@@ -1,48 +1,52 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, CreditCard, Store, TrendingUp } from "lucide-react";
-
-const stats = [
-  {
-    title: "Total Businesses",
-    value: "—",
-    description: "Active businesses",
-    icon: Store,
-  },
-  {
-    title: "Total Customers",
-    value: "—",
-    description: "Registered customers",
-    icon: Users,
-  },
-  {
-    title: "Loyalty Cards",
-    value: "—",
-    description: "Active cards",
-    icon: CreditCard,
-  },
-  {
-    title: "Transactions",
-    value: "—",
-    description: "This month",
-    icon: TrendingUp,
-  },
-];
+import { useBusinessStats } from "@/features/control-panel/business/hooks/useBusinessStats";
 
 const Index = () => {
+  const { data: bStats, isLoading: bLoading } = useBusinessStats("production");
+
+  const stats = [
+    {
+      title: "Total de Negocios",
+      value: bLoading ? "..." : bStats?.total ?? 0,
+      description: "Negocios registrados",
+      icon: Store,
+    },
+    {
+      title: "Negocios Activos",
+      value: bLoading ? "..." : bStats?.active ?? 0,
+      description: "Suscripciones pagas",
+      icon: TrendingUp,
+    },
+    {
+      title: "Total de Clientes",
+      value: "—",
+      description: "Próximamente",
+      icon: Users,
+    },
+    {
+      title: "Tarjetas activas",
+      value: "—",
+      description: "Próximamente",
+      icon: CreditCard,
+    },
+  ];
+
   return (
-    <DashboardLayout title="Dashboard">
+    <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
+          <h2 className="text-2xl font-bold text-foreground">Bienvenido de nuevo</h2>
           <p className="text-muted-foreground">
-            Here's an overview of your LoyalScan platform.
+            Aquí tienes un resumen de tu plataforma LoyalScan.
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
-            <Card key={stat.title} className="hover:shadow-md transition-shadow">
+            <Card key={stat.title} className="hover:shadow-md transition-shadow border-none shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}
@@ -62,21 +66,21 @@ const Index = () => {
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest platform activities</CardDescription>
+              <CardTitle>Actividad Reciente</CardTitle>
+              <CardDescription>Últimas actividades en la plataforma</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">No recent activity</p>
+              <p className="text-sm text-muted-foreground">No hay actividad reciente</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Common administrative tasks</CardDescription>
+              <CardTitle>Acciones Rápidas</CardTitle>
+              <CardDescription>Tareas administrativas comunes</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Select an option from the sidebar</p>
+              <p className="text-sm text-muted-foreground">Selecciona una opción de la barra lateral</p>
             </CardContent>
           </Card>
         </div>

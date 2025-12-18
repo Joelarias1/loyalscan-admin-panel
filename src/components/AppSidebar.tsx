@@ -1,17 +1,19 @@
+
 import {
-  LayoutDashboard,
-  Users,
-  CreditCard,
-  Store,
-  MapPin,
-  Settings,
-  LogOut,
-  Bell,
-  BarChart3,
-  Mail,
-} from "lucide-react";
+  LayoutGrid01Icon,
+  Users01Icon,
+  CreditCard01Icon,
+  Building02Icon,
+  MarkerPin01Icon,
+  Settings01Icon,
+  LogOut01Icon,
+  Bell01Icon,
+  BarChart01Icon,
+  Mail01Icon,
+  LayoutLeftIcon,
+} from "@untitledui/icons-react/outline";
 import { NavLink } from "@/components/NavLink";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   Sidebar,
   SidebarContent,
@@ -26,53 +28,59 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 
 const mainNavItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Businesses", url: "/businesses", icon: Store },
-  { title: "Customers", url: "/customers", icon: Users },
-  { title: "Loyalty Cards", url: "/loyalty-cards", icon: CreditCard },
-  { title: "Locations", url: "/locations", icon: MapPin },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutGrid01Icon },
+  { title: "Negocios", url: "/businesses", icon: Building02Icon },
+  { title: "Clientes", url: "/customers", icon: Users01Icon },
+  { title: "Tarjetas de Fidelidad", url: "/loyalty-cards", icon: CreditCard01Icon },
+  { title: "Ubicaciones", url: "/locations", icon: MarkerPin01Icon },
 ];
 
 const marketingItems = [
-  { title: "Campaigns", url: "/campaigns", icon: Mail },
-  { title: "Push Messages", url: "/push-messages", icon: Bell },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
+  { title: "Campañas", url: "/campaigns", icon: Mail01Icon },
+  { title: "Mensajes Push", url: "/push-messages", icon: Bell01Icon },
+  { title: "Analíticas", url: "/analytics", icon: BarChart01Icon },
 ];
 
 const systemItems = [
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Configuración", url: "/settings", icon: Settings01Icon },
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
   const { signOut, user } = useAuth();
   const collapsed = state === "collapsed";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <CreditCard className="w-4 h-4 text-white" />
-          </div>
+    <Sidebar collapsible="icon" className="border-none bg-sidebar-background">
+      <SidebarHeader className="h-14 flex flex-row items-center px-4 justify-between">
+        <div className="flex items-center gap-2 transition-all duration-200">
+          <img
+            src="/logo.svg"
+            alt="Logo"
+            className="h-8 w-8 object-contain transition-all"
+          />
           {!collapsed && (
-            <div className="flex flex-col">
-              <span className="font-semibold text-foreground">LoyalScan</span>
-              <span className="text-xs text-muted-foreground">Admin Panel</span>
-            </div>
+            <span className="font-bold text-lg tracking-tight">
+              LoyalScan
+            </span>
           )}
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 shrink-0"
+          onClick={toggleSidebar}
+        >
+          <LayoutLeftIcon className="h-4 w-4" />
+        </Button>
       </SidebarHeader>
-
-      <Separator />
 
       <SidebarContent className="px-2">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground px-2">
-            Main
+          <SidebarGroupLabel className="px-2">
+            Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -82,8 +90,7 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
                       <item.icon className="h-4 w-4 flex-shrink-0" />
                       <span>{item.title}</span>
@@ -96,7 +103,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground px-2">
+          <SidebarGroupLabel className="px-2">
             Marketing
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -106,8 +113,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink
                       to={item.url}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
                       <item.icon className="h-4 w-4 flex-shrink-0" />
                       <span>{item.title}</span>
@@ -120,8 +126,8 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground px-2">
-            System
+          <SidebarGroupLabel className="px-2">
+            Sistema
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -130,8 +136,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink
                       to={item.url}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
                       <item.icon className="h-4 w-4 flex-shrink-0" />
                       <span>{item.title}</span>
@@ -145,17 +150,16 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 mt-auto">
-        <Separator className="mb-4" />
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
-            <Users className="w-4 h-4 text-muted-foreground" />
+          <div className="w-8 h-8 bg-white border border-border/50 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+            <Users01Icon className="w-4 h-4 text-primary" />
           </div>
           {!collapsed && (
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-medium text-foreground truncate">
+              <span className="text-sm font-medium truncate">
                 {user?.email?.split('@')[0] || 'Admin'}
               </span>
-              <span className="text-xs text-muted-foreground truncate">
+              <span className="text-xs opacity-70 truncate">
                 {user?.email || 'admin@loyalscan.com'}
               </span>
             </div>
@@ -164,11 +168,11 @@ export function AppSidebar() {
         <Button
           variant="ghost"
           size={collapsed ? "icon" : "default"}
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          className="w-full justify-start gap-3 hover:text-red-400"
           onClick={signOut}
         >
-          <LogOut className="h-4 w-4 flex-shrink-0" />
-          {!collapsed && <span>Sign Out</span>}
+          <LogOut01Icon className="h-4 w-4 flex-shrink-0" />
+          {!collapsed && <span>Cerrar Sesión</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>
