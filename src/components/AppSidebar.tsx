@@ -54,27 +54,33 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-none bg-sidebar-background">
-      <SidebarHeader className="h-14 flex flex-row items-center px-4 justify-between">
-        <div className="flex items-center gap-2 transition-all duration-200">
-          <img
-            src="/logo.svg"
-            alt="Logo"
-            className="h-8 w-8 object-contain transition-all"
-          />
+      <SidebarHeader className="px-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="LoyalScan" className="h-10">
+              <img
+                src="/logo.svg"
+                alt="Logo"
+                className="h-5 w-5 object-contain"
+              />
+              <span className="font-bold text-base tracking-tight">LoyalScan</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           {!collapsed && (
-            <span className="font-bold text-lg tracking-tight">
-              LoyalScan
-            </span>
+            <SidebarMenuItem>
+              <div className="flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={toggleSidebar}
+                >
+                  <LayoutLeftIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            </SidebarMenuItem>
           )}
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 shrink-0"
-          onClick={toggleSidebar}
-        >
-          <LayoutLeftIcon className="h-4 w-4" />
-        </Button>
+        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent className="px-2">
@@ -168,7 +174,7 @@ export function AppSidebar() {
         <Button
           variant="ghost"
           size={collapsed ? "icon" : "default"}
-          className="w-full justify-start gap-3 hover:text-red-400"
+          className={`${collapsed ? 'w-8 h-8 mx-auto' : 'w-full justify-start gap-3'} hover:text-red-400`}
           onClick={signOut}
         >
           <LogOut01Icon className="h-4 w-4 flex-shrink-0" />

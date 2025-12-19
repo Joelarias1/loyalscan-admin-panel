@@ -5,7 +5,7 @@ import { Store, CreditCard, XCircle, Clock } from "lucide-react";
 import { useBusinessStats, SubscriptionEnvironment } from "../hooks/useBusinessStats";
 import { useBusinesses } from "../hooks/useBusinesses";
 import { BusinessTable } from "../components/BusinessTable";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Businesses = () => {
@@ -49,12 +49,12 @@ const Businesses = () => {
   ];
 
   return (
-    <DashboardLayout title="Negocios">
+    <DashboardLayout>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Gestión de Negocios</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-2xl font-bold text-gray-900">Negocios</h2>
+            <p className="text-gray-500">
               Monitorea y administra todos los negocios registrados.
             </p>
           </div>
@@ -101,14 +101,14 @@ const Businesses = () => {
           ))}
         </div>
 
-        <Card className="border-none shadow-sm overflow-hidden">
-          <CardHeader className="pb-0">
-            <CardTitle>Listado de Negocios</CardTitle>
-            <CardDescription>
+        <Card className="border border-gray-200 shadow-sm">
+          <CardHeader className="border-b border-gray-100 bg-white pb-6">
+            <CardTitle className="text-xl font-semibold text-gray-900">Listado de Negocios</CardTitle>
+            <CardDescription className="text-gray-600 mt-1">
               Detalle completo de los negocios en el entorno de {env}.
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-0 mt-4">
+          <CardContent className="p-6">
             <BusinessTable data={businesses || []} isLoading={businessesLoading} isTestMode={env === "test"} />
           </CardContent>
         </Card>
