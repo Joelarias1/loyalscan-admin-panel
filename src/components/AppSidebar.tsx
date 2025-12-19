@@ -57,18 +57,16 @@ export function AppSidebar() {
       <SidebarHeader className="px-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="LoyalScan" className="h-10">
-              <img
-                src="/logo.svg"
-                alt="Logo"
-                className="h-5 w-5 object-contain"
-              />
-              <span className="font-bold text-base tracking-tight">LoyalScan</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          {!collapsed && (
-            <SidebarMenuItem>
-              <div className="flex justify-end">
+            <div className="flex items-center justify-between w-full">
+              <SidebarMenuButton tooltip="LoyalScan" className="h-10 flex-1">
+                <img
+                  src="/logo.svg"
+                  alt="Logo"
+                  className="h-6 w-6 object-contain"
+                />
+                <span className="font-bold text-base tracking-tight">LoyalScan</span>
+              </SidebarMenuButton>
+              {!collapsed && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -77,9 +75,9 @@ export function AppSidebar() {
                 >
                   <LayoutLeftIcon className="h-4 w-4" />
                 </Button>
-              </div>
-            </SidebarMenuItem>
-          )}
+              )}
+            </div>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
