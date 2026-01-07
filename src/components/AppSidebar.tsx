@@ -2,16 +2,11 @@
 import {
   LayoutGrid01Icon,
   Users01Icon,
-  CreditCard01Icon,
   Building02Icon,
-  MarkerPin01Icon,
-  Settings01Icon,
   LogOut01Icon,
-  Bell01Icon,
-  BarChart01Icon,
-  Mail01Icon,
   LayoutLeftIcon,
 } from "@untitledui/icons-react/outline";
+import { Clock } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
@@ -32,19 +27,7 @@ import { Button } from "@/components/ui/button";
 const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutGrid01Icon },
   { title: "Negocios", url: "/businesses", icon: Building02Icon },
-  { title: "Clientes", url: "/customers", icon: Users01Icon },
-  { title: "Tarjetas de Fidelidad", url: "/loyalty-cards", icon: CreditCard01Icon },
-  { title: "Ubicaciones", url: "/locations", icon: MarkerPin01Icon },
-];
-
-const marketingItems = [
-  { title: "Campañas", url: "/campaigns", icon: Mail01Icon },
-  { title: "Mensajes Push", url: "/push-messages", icon: Bell01Icon },
-  { title: "Analíticas", url: "/analytics", icon: BarChart01Icon },
-];
-
-const systemItems = [
-  { title: "Configuración", url: "/settings", icon: Settings01Icon },
+  { title: "Pruebas Gratuitas", url: "/trials", icon: Clock },
 ];
 
 export function AppSidebar() {
@@ -90,52 +73,6 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="px-2">
-            Marketing
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {marketingItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="px-2">
-            Sistema
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {systemItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
                       <item.icon className="h-4 w-4 flex-shrink-0" />

@@ -13,31 +13,29 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Table } from "@tanstack/react-table";
 import { CircleX, Columns3, Filter, ListFilter } from "lucide-react";
 import { RefObject } from "react";
-import { Business } from "../types";
-import { getStatusLabel } from "../utils";
+import { Trial } from "../types";
+import { getTrialStatusLabel } from "../utils";
 import { cn } from "@/lib/utils";
 
-interface BusinessTableToolbarProps {
-  table: Table<Business>;
+interface TrialTableToolbarProps {
+  table: Table<Trial>;
   inputRef: RefObject<HTMLInputElement>;
   id: string;
-  isTestMode: boolean;
   selectedStatuses: string[];
   uniqueStatusValues: string[];
   statusCounts: Map<any, any>;
   onStatusChange: (checked: boolean, value: string) => void;
 }
 
-export function BusinessTableToolbar({
+export function TrialTableToolbar({
   table,
   inputRef,
   id,
-  isTestMode,
   selectedStatuses,
   uniqueStatusValues,
   statusCounts,
   onStatusChange,
-}: BusinessTableToolbarProps) {
+}: TrialTableToolbarProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3">
@@ -48,7 +46,7 @@ export function BusinessTableToolbar({
             ref={inputRef}
             className={cn(
               "peer min-w-60 ps-9",
-              Boolean(table.getColumn("name")?.getFilterValue()) && "pe-9",
+              Boolean(table.getColumn("name")?.getFilterValue()) && "pe-9"
             )}
             value={(table.getColumn("name")?.getFilterValue() ?? "") as string}
             onChange={(e) => table.getColumn("name")?.setFilterValue(e.target.value)}
@@ -107,7 +105,7 @@ export function BusinessTableToolbar({
                       htmlFor={`${id}-status-${i}`}
                       className="flex grow justify-between gap-2 font-normal"
                     >
-                      {getStatusLabel(value, isTestMode).label}
+                      {getTrialStatusLabel(value as any).label}
                       <span className="ms-2 text-xs text-muted-foreground">
                         {statusCounts.get(value)}
                       </span>
@@ -138,10 +136,11 @@ export function BusinessTableToolbar({
               .filter((column) => column.getCanHide())
               .map((column) => {
                 const columnLabels: Record<string, string> = {
-                  payment_status: "Estado Plan",
-                  subscriptionType: "Plan",
-                  currentPeriodEnd: "Próximo Pago",
-                  canceledAt: "Cancelación",
+                  trial_type: "Tipo",
+                  trial_status: "Estado",
+                  onboarding_completed: "Onboarding",
+                  converted_at: "Conversión",
+                  days_remaining: "Días restantes",
                   created_at: "Registro",
                 };
                 return (

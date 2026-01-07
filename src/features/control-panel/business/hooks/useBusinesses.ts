@@ -17,6 +17,7 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
           id,
           name,
           email,
+          phone,
           owner_id,
           stripe_mode,
           stripe_customer_id,
@@ -24,6 +25,11 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
           is_trial,
           created_at,
           updated_at,
+          trial_tracking (
+            trial_type,
+            status,
+            trial_ends_at
+          ),
           business_subscriptions (
             is_active,
             subscriptions (
@@ -32,6 +38,7 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
               subscription_type,
               current_period_start,
               current_period_end,
+              canceled_at,
               stripe_subscription_id,
               subscription_plans (
                 id,
@@ -60,6 +67,8 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
         const subscription = activeSub?.subscriptions ?? null;
         // subscription_plans is a single object
         const plan = subscription?.subscription_plans ?? null;
+        // trial_tracking is an array, get first one
+        const trialTracking = business.trial_tracking?.[0] ?? null;
 
         // Format price for display
         const priceMonthly = plan?.price_monthly_cents
@@ -67,16 +76,24 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
           : null;
 
         return {
-          ...business,
-          subscription,
-          plan,
-          // Computed fields for easier table access
+          id: business.id,
+          name: business.name,
+          email: business.email,
+          phone: business.phone ?? null,
+          payment_status: business.payment_status,
+          is_trial: business.is_trial,
+          created_at: business.created_at,
+          // Plan info
           planName: plan?.name ?? null,
-          planEnvironment: plan?.environment ?? null,
           planPrice: priceMonthly,
-          subscriptionStatus: subscription?.status ?? null,
           subscriptionType: subscription?.subscription_type ?? null,
-          periodEnd: subscription?.current_period_end ?? null,
+          subscriptionStatus: subscription?.status ?? null,
+          // Trial info
+          trialType: trialTracking?.trial_type ?? null,
+          trialStatus: trialTracking?.status ?? null,
+          // Subscription dates
+          currentPeriodEnd: subscription?.current_period_end ?? null,
+          canceledAt: subscription?.canceled_at ?? null,
         };
       });
     },

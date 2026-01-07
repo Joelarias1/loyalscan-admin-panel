@@ -2,7 +2,13 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { Business } from "../types";
-import { formatPlanName, getStatusLabel, multiColumnFilterFn, statusFilterFn } from "../utils";
+import {
+  formatPlanName,
+  getPaymentStatusLabel,
+  getPlanLabel,
+  multiColumnFilterFn,
+  statusFilterFn,
+} from "../utils";
 import { RowActions } from "./RowActions";
 
 export const createColumns = (isTestMode: boolean): ColumnDef<Business>[] => [
@@ -32,71 +38,111 @@ export const createColumns = (isTestMode: boolean): ColumnDef<Business>[] => [
     header: "Negocio",
     accessorKey: "name",
     cell: ({ row }) => (
-      <div className="font-semibold text-gray-900">{row.getValue("name")}</div>
+      <div className="flex flex-col">
+        <span className="font-semibold text-gray-900">{row.getValue("name")}</span>
+        <span className="text-sm text-gray-500">{row.original.email || "—"}</span>
+        {row.original.phone && (
+          <span className="text-xs text-gray-400">{row.original.phone}</span>
+        )}
+      </div>
     ),
-    size: 200,
+    size: 260,
     filterFn: multiColumnFilterFn,
     enableHiding: false,
   },
   {
-    header: "Email",
-    accessorKey: "email",
-    cell: ({ row }) => (
-      <span className="text-gray-600">{row.getValue("email") || "—"}</span>
-    ),
-    size: 240,
-  },
-  {
-    header: "Estado",
+    header: "Estado Plan",
     accessorKey: "payment_status",
     cell: ({ row }) => {
-      const status = row.getValue("payment_status") as string;
-      const { label, variant, className } = getStatusLabel(status, isTestMode);
-      return <Badge variant={variant} className={className}>{label}</Badge>;
+      const { label, className } = getPaymentStatusLabel(row.original);
+      return (
+        <Badge variant="outline" className={`${className} font-medium`}>
+          {label}
+        </Badge>
+      );
     },
-    size: 120,
+    size: 140,
     filterFn: statusFilterFn,
   },
   {
     header: "Plan",
-    accessorKey: "planName",
+    accessorKey: "subscriptionType",
     cell: ({ row }) => {
-      const planName = row.original.planName;
-      const planPrice = row.original.planPrice;
-      const subscriptionType = row.original.subscriptionType;
+      const plan = getPlanLabel(row.original);
+      if (!plan) {
+        return <span className="text-gray-400">—</span>;
+      }
+      return (
+        <Badge variant="outline" className={`${plan.className} font-medium w-fit`}>
+          {plan.label}
+        </Badge>
+      );
+    },
+    size: 140,
+  },
+  {
+    header: "Próximo Pago",
+    accessorKey: "currentPeriodEnd",
+    cell: ({ row }) => {
+      const periodEnd = row.original.currentPeriodEnd;
+      const paymentStatus = row.original.payment_status;
 
-      if (!planName) {
-        return <span className="text-gray-500 italic text-sm">Sin plan</span>;
+      // Don't show for canceled or no_payment
+      if (!periodEnd || paymentStatus === "canceled" || paymentStatus === "no_payment") {
+        return <span className="text-gray-400">—</span>;
       }
 
-      if (subscriptionType === 'trial' || planName.toLowerCase().includes("trial")) {
-        return (
-          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 font-semibold hover:bg-amber-100">
-            TRIAL
-          </Badge>
-        );
-      }
-
-      if (planName.toLowerCase().includes("demo")) {
-        return (
-          <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300 font-semibold hover:bg-blue-100">
-            DEMO
-          </Badge>
-        );
-      }
-
-      const formattedPlanName = formatPlanName(planName);
+      const date = new Date(periodEnd);
+      const now = new Date();
+      const diffDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
       return (
         <div className="flex flex-col">
-          <span className="font-semibold text-sm text-gray-900">{formattedPlanName}</span>
-          {planPrice && (
-            <span className="text-xs text-gray-600">{planPrice}</span>
+          <span className="text-sm text-gray-700">
+            {date.toLocaleDateString("es-ES", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </span>
+          {diffDays > 0 && diffDays <= 7 && (
+            <span className="text-xs text-amber-600">En {diffDays} días</span>
           )}
         </div>
       );
     },
-    size: 150,
+    size: 120,
+  },
+  {
+    header: "Cancelación",
+    accessorKey: "canceledAt",
+    cell: ({ row }) => {
+      const canceledAt = row.original.canceledAt;
+      const planName = row.original.planName;
+
+      if (!canceledAt) {
+        return <span className="text-gray-400">—</span>;
+      }
+
+      const date = new Date(canceledAt);
+      return (
+        <div className="flex flex-col">
+          <Badge variant="outline" className="bg-rose-100 text-rose-800 border-rose-300 font-medium w-fit">
+            Cancelado
+          </Badge>
+          {planName && (
+            <span className="text-xs text-gray-500">{formatPlanName(planName)}</span>
+          )}
+          <span className="text-xs text-gray-400">
+            {date.toLocaleDateString("es-ES", {
+              day: "2-digit",
+              month: "short",
+            })}
+          </span>
+        </div>
+      );
+    },
+    size: 120,
   },
   {
     header: "Registro",
@@ -113,7 +159,7 @@ export const createColumns = (isTestMode: boolean): ColumnDef<Business>[] => [
         </span>
       );
     },
-    size: 120,
+    size: 100,
     enableSorting: true,
   },
   {

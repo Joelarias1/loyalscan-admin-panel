@@ -1,11 +1,25 @@
+export type PaymentStatus = "trialing" | "paid" | "active" | "no_payment" | "canceled" | "unpaid" | "trial_expired";
+export type TrialType = "with_card" | "without_card" | null;
+export type TrialStatus = "active" | "converted" | "expired" | "cancelled" | "pending_checkout" | null;
+
 export interface Business {
   id: string;
   name: string;
   email: string;
-  payment_status: "trialing" | "paid" | "active" | "no_payment" | "canceled" | "unpaid";
+  phone: string | null;
+  payment_status: PaymentStatus;
   is_trial: boolean;
+  // Plan info
   planName: string | null;
   planPrice: string | null;
   subscriptionType: string | null;
+  subscriptionStatus: string | null;
+  // Trial info
+  trialType: TrialType;
+  trialStatus: TrialStatus;
+  // Subscription dates
+  currentPeriodEnd: string | null;
+  canceledAt: string | null;
+  // Timestamps
   created_at: string;
 }
