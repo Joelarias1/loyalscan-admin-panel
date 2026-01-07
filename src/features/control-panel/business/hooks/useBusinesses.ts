@@ -49,6 +49,20 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
                 description
               )
             )
+          ),
+          business_implementation (
+            first_loyalty_card_created,
+            first_customer_registered,
+            first_stamp_given
+          ),
+          transactions (
+            id
+          ),
+          staff_members (
+            id
+          ),
+          customers (
+            id
           )
         `)
         .eq("stripe_mode", mode)
@@ -67,8 +81,14 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
         const subscription = activeSub?.subscriptions ?? null;
         // subscription_plans is a single object
         const plan = subscription?.subscription_plans ?? null;
-        // trial_tracking is an array, get first one
-        const trialTracking = business.trial_tracking?.[0] ?? null;
+        // trial_tracking is a single object (1-1 relation due to unique constraint on business_id)
+        const trialTracking = business.trial_tracking ?? null;
+        // business_implementation is a single object (1-1 relation due to unique constraint on business_id)
+        const impl = business.business_implementation ?? null;
+        // Count related entities
+        const transactionCount = business.transactions?.length ?? 0;
+        const staffCount = business.staff_members?.length ?? 0;
+        const customerCount = business.customers?.length ?? 0;
 
         // Format price for display
         const priceMonthly = plan?.price_monthly_cents
@@ -94,6 +114,16 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
           // Subscription dates
           currentPeriodEnd: subscription?.current_period_end ?? null,
           canceledAt: subscription?.canceled_at ?? null,
+          // Implementation milestones
+          implementation: {
+            firstLoyaltyCardCreated: impl?.first_loyalty_card_created ?? false,
+            firstCustomerRegistered: customerCount > 0,
+            firstStampGiven: transactionCount > 0,
+            hasStaff: staffCount > 0,
+          },
+          // Counts for display
+          customerCount,
+          transactionCount,
         };
       });
     },

@@ -129,8 +129,8 @@ export const TrialTable = ({ data, isLoading }: TrialTableProps) => {
       />
 
       {/* Table */}
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-        <Table className="table-fixed">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+        <Table className="table-fixed min-w-[900px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow

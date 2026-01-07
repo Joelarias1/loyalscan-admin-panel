@@ -113,6 +113,59 @@ export const BusinessTable = ({ data, isLoading, isTestMode = false }: BusinessT
     table.getColumn("payment_status")?.setFilterValue(newFilterValue.length ? newFilterValue : undefined);
   };
 
+  // Get unique plan values (including null for "no plan")
+  const uniquePlanValues = useMemo(() => {
+    const planColumn = table.getColumn("planName");
+    if (!planColumn) return [];
+    const facetedValues = planColumn.getFacetedUniqueValues();
+    const values = Array.from(facetedValues.keys()).filter((v) => v !== null && v !== undefined) as string[];
+    // Check if there are any null/undefined values (businesses without plans)
+    const hasNoPlan = data.some((b) => !b.planName);
+    if (hasNoPlan) {
+      values.unshift("__no_plan__");
+    }
+    return values.sort((a, b) => {
+      if (a === "__no_plan__") return -1;
+      if (b === "__no_plan__") return 1;
+      return a.localeCompare(b);
+    });
+  }, [table.getColumn("planName")?.getFacetedUniqueValues(), data]);
+
+  // Get counts for each plan
+  const planCounts = useMemo(() => {
+    const planColumn = table.getColumn("planName");
+    if (!planColumn) return new Map();
+    const facetedValues = planColumn.getFacetedUniqueValues();
+    const counts = new Map(facetedValues);
+    // Count businesses without plans
+    const noPlanCount = data.filter((b) => !b.planName).length;
+    if (noPlanCount > 0) {
+      counts.set("__no_plan__", noPlanCount);
+    }
+    return counts;
+  }, [table.getColumn("planName")?.getFacetedUniqueValues(), data]);
+
+  const selectedPlans = useMemo(() => {
+    const filterValue = table.getColumn("planName")?.getFilterValue() as string[];
+    return filterValue ?? [];
+  }, [table.getColumn("planName")?.getFilterValue()]);
+
+  const handlePlanChange = (checked: boolean, value: string) => {
+    const filterValue = table.getColumn("planName")?.getFilterValue() as string[];
+    const newFilterValue = filterValue ? [...filterValue] : [];
+
+    if (checked) {
+      newFilterValue.push(value);
+    } else {
+      const index = newFilterValue.indexOf(value);
+      if (index > -1) {
+        newFilterValue.splice(index, 1);
+      }
+    }
+
+    table.getColumn("planName")?.setFilterValue(newFilterValue.length ? newFilterValue : undefined);
+  };
+
   if (isLoading) {
     return <BusinessTableSkeleton />;
   }
@@ -128,11 +181,15 @@ export const BusinessTable = ({ data, isLoading, isTestMode = false }: BusinessT
         uniqueStatusValues={uniqueStatusValues}
         statusCounts={statusCounts}
         onStatusChange={handleStatusChange}
+        selectedPlans={selectedPlans}
+        uniquePlanValues={uniquePlanValues}
+        planCounts={planCounts}
+        onPlanChange={handlePlanChange}
       />
 
       {/* Table */}
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-        <Table className="table-fixed">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+        <Table className="table-fixed min-w-[1200px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-b border-gray-200 bg-gray-50">

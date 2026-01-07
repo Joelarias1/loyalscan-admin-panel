@@ -25,6 +25,18 @@ export const statusFilterFn: FilterFn<Business> = (row, columnId, filterValue: s
   return filterValue.includes(status);
 };
 
+// Plan filter function
+export const planFilterFn: FilterFn<Business> = (row, columnId, filterValue: string[]) => {
+  if (!filterValue?.length) return true;
+  const planName = row.original.planName;
+  // Handle "no plan" filter
+  if (filterValue.includes("__no_plan__")) {
+    if (!planName) return true;
+  }
+  if (!planName) return false;
+  return filterValue.includes(planName.toLowerCase());
+};
+
 // Payment status label mapping (Estado Plan)
 // Uses business data to determine REAL status (not just payment_status field)
 export const getPaymentStatusLabel = (
@@ -37,7 +49,7 @@ export const getPaymentStatusLabel = (
   if (subscriptionStatus === "trialing" || (trialType && payment_status === "trialing")) {
     const trialLabel = trialType === "with_card" ? "CT" : trialType === "without_card" ? "ST" : "";
     return {
-      label: `En prueba${trialLabel ? ` (${trialLabel})` : ""}`,
+      label: `Prueba gratis${trialLabel ? ` (${trialLabel})` : ""}`,
       className: "bg-blue-100 text-blue-800 border-blue-300"
     };
   }
@@ -62,7 +74,7 @@ export const getPaymentStatusLabel = (
     case "trialing": {
       const trialLabel = trialType === "with_card" ? "CT" : trialType === "without_card" ? "ST" : "";
       return {
-        label: `En prueba${trialLabel ? ` (${trialLabel})` : ""}`,
+        label: `Prueba gratis${trialLabel ? ` (${trialLabel})` : ""}`,
         className: "bg-blue-100 text-blue-800 border-blue-300"
       };
     }

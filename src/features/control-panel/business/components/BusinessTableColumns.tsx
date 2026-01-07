@@ -1,39 +1,18 @@
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
+import { Check, X } from "lucide-react";
 import { Business } from "../types";
 import {
   formatPlanName,
   getPaymentStatusLabel,
   getPlanLabel,
   multiColumnFilterFn,
+  planFilterFn,
   statusFilterFn,
 } from "../utils";
 import { RowActions } from "./RowActions";
 
-export const createColumns = (isTestMode: boolean): ColumnDef<Business>[] => [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Seleccionar todo"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Seleccionar fila"
-      />
-    ),
-    size: 40,
-    enableSorting: false,
-    enableHiding: false,
-  },
+export const createColumns = (_isTestMode: boolean): ColumnDef<Business>[] => [
   {
     header: "Negocio",
     accessorKey: "name",
@@ -66,19 +45,93 @@ export const createColumns = (isTestMode: boolean): ColumnDef<Business>[] => [
   },
   {
     header: "Plan",
-    accessorKey: "subscriptionType",
+    accessorKey: "planName",
     cell: ({ row }) => {
       const plan = getPlanLabel(row.original);
+      const planPrice = row.original.planPrice;
       if (!plan) {
         return <span className="text-gray-400">—</span>;
       }
       return (
-        <Badge variant="outline" className={`${plan.className} font-medium w-fit`}>
-          {plan.label}
-        </Badge>
+        <div className="flex flex-col gap-0.5">
+          <Badge variant="outline" className={`${plan.className} font-medium w-fit`}>
+            {plan.label}
+          </Badge>
+          {planPrice && (
+            <span className="text-xs text-gray-500">{planPrice}</span>
+          )}
+        </div>
       );
     },
     size: 140,
+    filterFn: planFilterFn,
+  },
+  {
+    id: "implementation",
+    header: "Progreso",
+    cell: ({ row }) => {
+      const impl = row.original.implementation;
+      const items = [
+        { done: impl.firstLoyaltyCardCreated, label: "Club" },
+        { done: impl.firstCustomerRegistered, label: "Cliente" },
+        { done: impl.firstStampGiven, label: "Escaneo" },
+        { done: impl.hasStaff, label: "Staff" },
+      ];
+
+      return (
+        <div className="flex flex-col gap-1">
+          {items.map((item) => (
+            <div key={item.label} className="flex items-center gap-1.5">
+              <div
+                className={`flex items-center justify-center w-4 h-4 rounded ${
+                  item.done
+                    ? "bg-emerald-100 text-emerald-600"
+                    : "bg-gray-100 text-gray-400"
+                }`}
+              >
+                {item.done ? (
+                  <Check className="w-2.5 h-2.5" />
+                ) : (
+                  <X className="w-2.5 h-2.5" />
+                )}
+              </div>
+              <span className={`text-xs ${item.done ? "text-gray-700" : "text-gray-400"}`}>
+                {item.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+    },
+    size: 110,
+  },
+  {
+    header: "Clientes",
+    accessorKey: "customerCount",
+    cell: ({ row }) => {
+      const count = row.original.customerCount;
+      return (
+        <span className={`text-sm font-medium ${count > 0 ? "text-gray-900" : "text-gray-400"}`}>
+          {count}
+        </span>
+      );
+    },
+    size: 100,
+    enableSorting: true,
+  },
+  {
+    header: "Escaneos",
+    accessorKey: "transactionCount",
+    cell: ({ row }) => {
+      const count = row.original.transactionCount;
+      return (
+        <span className={`text-sm font-medium ${count > 0 ? "text-gray-900" : "text-gray-400"}`}>
+          {count}
+        </span>
+      );
+    },
+    size: 100,
+    enableSorting: true,
   },
   {
     header: "Próximo Pago",
@@ -112,6 +165,7 @@ export const createColumns = (isTestMode: boolean): ColumnDef<Business>[] => [
       );
     },
     size: 120,
+    enableSorting: true,
   },
   {
     header: "Cancelación",
@@ -143,6 +197,7 @@ export const createColumns = (isTestMode: boolean): ColumnDef<Business>[] => [
       );
     },
     size: 120,
+    enableSorting: true,
   },
   {
     header: "Registro",

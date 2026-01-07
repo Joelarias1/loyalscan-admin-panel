@@ -11,9 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table } from "@tanstack/react-table";
-import { CircleX, Columns3, Filter, ListFilter } from "lucide-react";
+import { CircleX, Columns3, Filter, ListFilter, Package } from "lucide-react";
 import { RefObject } from "react";
 import { Business } from "../types";
+import { getPlanDisplayName, NO_PLAN_VALUE } from "../plans";
 import { getStatusLabel } from "../utils";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,10 @@ interface BusinessTableToolbarProps {
   uniqueStatusValues: string[];
   statusCounts: Map<any, any>;
   onStatusChange: (checked: boolean, value: string) => void;
+  selectedPlans: string[];
+  uniquePlanValues: string[];
+  planCounts: Map<any, any>;
+  onPlanChange: (checked: boolean, value: string) => void;
 }
 
 export function BusinessTableToolbar({
@@ -37,11 +42,14 @@ export function BusinessTableToolbar({
   uniqueStatusValues,
   statusCounts,
   onStatusChange,
+  selectedPlans,
+  uniquePlanValues,
+  planCounts,
+  onPlanChange,
 }: BusinessTableToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex items-center gap-3">
-        {/* Filter by name or email */}
+    <div className="flex flex-wrap items-center gap-3">
+      {/* Filter by name or email */}
         <div className="relative">
           <Input
             id={`${id}-input`}
@@ -118,6 +126,50 @@ export function BusinessTableToolbar({
             </div>
           </PopoverContent>
         </Popover>
+        {/* Filter by plan */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline">
+              <Package
+                className="-ms-1 me-2 opacity-60"
+                size={16}
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+              Plan
+              {selectedPlans.length > 0 && (
+                <span className="-me-1 ms-3 inline-flex h-5 max-h-full items-center rounded border border-border bg-background px-1 font-[inherit] text-[0.625rem] font-medium text-muted-foreground/70">
+                  {selectedPlans.length}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="min-w-36 p-3" align="start">
+            <div className="space-y-3">
+              <div className="text-xs font-medium text-muted-foreground">Planes</div>
+              <div className="space-y-3">
+                {uniquePlanValues.map((value, i) => (
+                  <div key={value} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`${id}-plan-${i}`}
+                      checked={selectedPlans.includes(value)}
+                      onCheckedChange={(checked: boolean) => onPlanChange(checked, value)}
+                    />
+                    <Label
+                      htmlFor={`${id}-plan-${i}`}
+                      className="flex grow justify-between gap-2 font-normal"
+                    >
+                      {value === NO_PLAN_VALUE ? "Sin plan" : getPlanDisplayName(value, isTestMode)}
+                      <span className="ms-2 text-xs text-muted-foreground">
+                        {planCounts.get(value)}
+                      </span>
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
         {/* Toggle columns visibility */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -139,7 +191,10 @@ export function BusinessTableToolbar({
               .map((column) => {
                 const columnLabels: Record<string, string> = {
                   payment_status: "Estado Plan",
-                  subscriptionType: "Plan",
+                  planName: "Plan",
+                  implementation: "Progreso",
+                  customerCount: "Clientes",
+                  transactionCount: "Escaneos",
                   currentPeriodEnd: "Próximo Pago",
                   canceledAt: "Cancelación",
                   created_at: "Registro",
@@ -157,15 +212,6 @@ export function BusinessTableToolbar({
               })}
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
-      <div className="flex items-center gap-3">
-        {/* Selected count */}
-        {table.getSelectedRowModel().rows.length > 0 && (
-          <span className="text-sm text-muted-foreground">
-            {table.getSelectedRowModel().rows.length} seleccionado(s)
-          </span>
-        )}
-      </div>
     </div>
   );
 }

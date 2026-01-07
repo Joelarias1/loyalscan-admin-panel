@@ -13,6 +13,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useNavigate } from "react-router-dom";
+import { useSidebarState } from "@/hooks/use-sidebar-state";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -71,14 +72,15 @@ function DashboardHeader({ onOpenSearch }: { onOpenSearch: () => void }) {
 }
 
 export function DashboardLayout({ children, title }: DashboardLayoutProps) {
-  const [open, setOpen] = React.useState(false);
+  const [commandOpen, setCommandOpen] = React.useState(false);
+  const { open: sidebarOpen, setOpen: setSidebarOpen } = useSidebarState(true);
   const navigate = useNavigate();
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        setCommandOpen((open) => !open);
       }
     };
 
@@ -87,23 +89,23 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   }, []);
 
   const handleSelect = (url: string) => {
-    setOpen(false);
+    setCommandOpen(false);
     navigate(url);
   };
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-sidebar-background">
+    <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
+      <div className="min-h-screen flex w-full bg-sidebar-background overflow-x-hidden">
         <AppSidebar />
         {/* SidebarInset transparente para mantener el fondo gris */}
-        <SidebarInset className="flex flex-col flex-1 p-0 bg-transparent">
+        <SidebarInset className="flex flex-col flex-1 min-w-0 p-0 bg-transparent">
 
           {/* Top Header - Search bar with collapse toggle */}
-          <DashboardHeader onOpenSearch={() => setOpen(true)} />
+          <DashboardHeader onOpenSearch={() => setCommandOpen(true)} />
 
           {/* Main Content - Floating White Card */}
-          <div className="flex-1 flex flex-col overflow-hidden mx-4 mb-4 rounded-xl bg-white shadow-sm border border-border/40">
-            <div className="flex-1 overflow-auto p-6">
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden mx-4 mb-4 rounded-xl bg-white shadow-sm border border-border/40">
+            <div className="flex-1 min-w-0 overflow-auto p-6">
               {children}
             </div>
           </div>
@@ -111,7 +113,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
         </SidebarInset>
       </div>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
         <CommandInput placeholder="Buscar páginas..." />
         <CommandList>
           <CommandEmpty>No se encontraron resultados.</CommandEmpty>

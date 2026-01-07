@@ -2,6 +2,13 @@ export type PaymentStatus = "trialing" | "paid" | "active" | "no_payment" | "can
 export type TrialType = "with_card" | "without_card" | null;
 export type TrialStatus = "active" | "converted" | "expired" | "cancelled" | "pending_checkout" | null;
 
+export interface BusinessImplementation {
+  firstLoyaltyCardCreated: boolean;
+  firstCustomerRegistered: boolean;
+  firstStampGiven: boolean;
+  hasStaff: boolean;
+}
+
 export interface Business {
   id: string;
   name: string;
@@ -20,6 +27,11 @@ export interface Business {
   // Subscription dates
   currentPeriodEnd: string | null;
   canceledAt: string | null;
+  // Implementation milestones
+  implementation: BusinessImplementation;
+  // Counts
+  customerCount: number;
+  transactionCount: number;
   // Timestamps
   created_at: string;
 }
