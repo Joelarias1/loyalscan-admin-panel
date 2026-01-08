@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Businesses from "./features/control-panel/business/pages/Businesses";
 import Trials from "./features/control-panel/trials/pages/Trials";
+import LoyaltyCards from "./features/control-panel/loyalty-cards/pages/LoyaltyCards";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,11 @@ const App = () => (
               <Route path="/trials" element={
                 <ProtectedRoute>
                   <Trials />
+                </ProtectedRoute>
+              } />
+              <Route path="/loyalty-cards" element={
+                <ProtectedRoute>
+                  <LoyaltyCards />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

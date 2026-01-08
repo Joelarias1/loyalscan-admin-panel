@@ -3,6 +3,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Check, X } from "lucide-react";
 import { Business } from "../types";
 import {
+  formatCurrency,
   formatPlanName,
   getPaymentStatusLabel,
   getPlanLabel,
@@ -131,6 +132,21 @@ export const createColumns = (_isTestMode: boolean): ColumnDef<Business>[] => [
       );
     },
     size: 100,
+    enableSorting: true,
+  },
+  {
+    header: "Ingresos",
+    accessorKey: "totalRevenue",
+    cell: ({ row }) => {
+      const revenue = row.original.totalRevenue;
+      const currency = row.original.currency;
+      return (
+        <span className={`text-sm font-medium ${revenue > 0 ? "text-emerald-700" : "text-gray-400"}`}>
+          {formatCurrency(revenue, currency)}
+        </span>
+      );
+    },
+    size: 120,
     enableSorting: true,
   },
   {

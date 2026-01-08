@@ -53,7 +53,7 @@ export const createColumns = (): ColumnDef<Trial>[] => [
       const type = row.original.trial_type;
       const { label, className } = getTrialTypeLabel(type);
       return (
-        <Badge variant="outline" className={`${className} font-medium`}>
+        <Badge variant="outline" className={`${className} font-medium w-fit`}>
           {label}
         </Badge>
       );
@@ -67,7 +67,7 @@ export const createColumns = (): ColumnDef<Trial>[] => [
       const status = row.original.trial_status;
       const { label, className } = getTrialStatusLabel(status);
       return (
-        <Badge variant="outline" className={`${className} font-medium`}>
+        <Badge variant="outline" className={`${className} font-medium w-fit`}>
           {label}
         </Badge>
       );
@@ -118,15 +118,14 @@ export const createColumns = (): ColumnDef<Trial>[] => [
           <div className="flex flex-col">
             <Badge
               variant="outline"
-              className="font-medium bg-emerald-100 text-emerald-800 border-emerald-300 mb-1"
+              className="font-medium bg-emerald-100 text-emerald-800 border-emerald-300 mb-1 w-fit"
             >
-              Convertido
+              Pagó
             </Badge>
             <span className="text-xs text-gray-500">
               {trialEndDate.toLocaleDateString("es-ES", {
                 day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
+                month: "short",
               })}
             </span>
           </div>
@@ -136,9 +135,9 @@ export const createColumns = (): ColumnDef<Trial>[] => [
         return (
           <Badge
             variant="outline"
-            className="font-medium bg-blue-100 text-blue-800 border-blue-300"
+            className="font-medium bg-blue-100 text-blue-800 border-blue-300 w-fit"
           >
-            Pendiente cobro
+            Por cobrar
           </Badge>
         );
       }

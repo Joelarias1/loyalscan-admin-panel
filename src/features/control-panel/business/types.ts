@@ -32,6 +32,9 @@ export interface Business {
   // Counts
   customerCount: number;
   transactionCount: number;
+  // Revenue
+  totalRevenue: number;
+  currency: string;
   // Timestamps
   created_at: string;
 }

@@ -29,7 +29,7 @@ export const getTrialTypeLabel = (type: TrialType | null): { label: string; clas
       };
     default:
       return {
-        label: "Desconocido",
+        label: "—",
         className: "bg-gray-100 text-gray-800 border-gray-300",
       };
   }
@@ -60,7 +60,7 @@ export const getTrialStatusLabel = (status: TrialStatus | null): { label: string
       };
     case "pending_checkout":
       return {
-        label: "Solo se registró",
+        label: "Solo registro",
         className: "bg-orange-100 text-orange-800 border-orange-300",
       };
     default:

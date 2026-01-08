@@ -6,7 +6,7 @@ import {
   LogOut01Icon,
   LayoutLeftIcon,
 } from "@untitledui/icons-react/outline";
-import { Clock } from "lucide-react";
+import { Clock, CreditCard } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutGrid01Icon },
   { title: "Negocios", url: "/businesses", icon: Building02Icon },
+  { title: "Tarjetas Fidelidad", url: "/loyalty-cards", icon: CreditCard },
   { title: "Pruebas Gratuitas", url: "/trials", icon: Clock },
 ];
 

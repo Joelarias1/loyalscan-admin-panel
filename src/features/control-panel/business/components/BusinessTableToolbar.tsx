@@ -195,6 +195,7 @@ export function BusinessTableToolbar({
                   implementation: "Progreso",
                   customerCount: "Clientes",
                   transactionCount: "Escaneos",
+                  totalRevenue: "Ingresos",
                   currentPeriodEnd: "Próximo Pago",
                   canceledAt: "Cancelación",
                   created_at: "Registro",

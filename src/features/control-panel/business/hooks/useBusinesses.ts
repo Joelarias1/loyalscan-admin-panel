@@ -25,6 +25,7 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
           is_trial,
           created_at,
           updated_at,
+          business_currency,
           trial_tracking (
             trial_type,
             status,
@@ -56,7 +57,8 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
             first_stamp_given
           ),
           transactions (
-            id
+            id,
+            amount_spent
           ),
           staff_members (
             id
@@ -85,8 +87,13 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
         const trialTracking = business.trial_tracking ?? null;
         // business_implementation is a single object (1-1 relation due to unique constraint on business_id)
         const impl = business.business_implementation ?? null;
-        // Count related entities
-        const transactionCount = business.transactions?.length ?? 0;
+        // Count related entities and calculate revenue
+        const transactions = business.transactions ?? [];
+        const transactionCount = transactions.length;
+        const totalRevenue = transactions.reduce(
+          (sum: number, t: any) => sum + (parseFloat(t.amount_spent) || 0),
+          0
+        );
         const staffCount = business.staff_members?.length ?? 0;
         const customerCount = business.customers?.length ?? 0;
 
@@ -124,6 +131,9 @@ export const useBusinesses = (environment: SubscriptionEnvironment = "production
           // Counts for display
           customerCount,
           transactionCount,
+          // Revenue
+          totalRevenue,
+          currency: business.business_currency ?? "CLP",
         };
       });
     },
