@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const Businesses = () => {
   const [env, setEnv] = useState<SubscriptionEnvironment>("production");
   const { data: stats, isLoading: statsLoading } = useBusinessStats(env);
-  const { data: businesses, isLoading: businessesLoading } = useBusinesses(env);
+  const { data: businesses, isLoading: businessesLoading, refetch, isFetching } = useBusinesses(env);
 
   const cards = [
     {
@@ -109,7 +109,13 @@ const Businesses = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
-            <BusinessTable data={businesses || []} isLoading={businessesLoading} isTestMode={env === "test"} />
+            <BusinessTable
+              data={businesses || []}
+              isLoading={businessesLoading}
+              isTestMode={env === "test"}
+              onRefresh={() => refetch()}
+              isRefreshing={isFetching && !businessesLoading}
+            />
           </CardContent>
         </Card>
       </div>

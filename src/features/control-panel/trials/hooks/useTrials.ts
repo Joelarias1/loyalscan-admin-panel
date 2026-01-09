@@ -54,6 +54,7 @@ export const useTrials = (mode: StripeMode = "live") => {
       // Fetch customer and transaction counts for all businesses
       let customerCounts: Record<string, number> = {};
       let transactionCounts: Record<string, number> = {};
+      let sacTracking: Record<string, { meeting_scheduled: boolean; attended_implementation: boolean }> = {};
 
       if (businessIds.length > 0) {
         // Fetch customer counts
@@ -81,6 +82,21 @@ export const useTrials = (mode: StripeMode = "live") => {
             return acc;
           }, {} as Record<string, number>);
         }
+
+        // Fetch SAC tracking data
+        const { data: sacData } = await supabase
+          .from("sac_tracking")
+          .select("business_id, meeting_scheduled, attended_implementation")
+          .in("business_id", businessIds);
+
+        if (sacData) {
+          sacData.forEach((row) => {
+            sacTracking[row.business_id] = {
+              meeting_scheduled: row.meeting_scheduled ?? false,
+              attended_implementation: row.attended_implementation ?? false,
+            };
+          });
+        }
       }
 
       // Transform the data with counts
@@ -107,6 +123,8 @@ export const useTrials = (mode: StripeMode = "live") => {
           converted_at: item.converted_at,
           customer_count: customerCounts[businessId] ?? 0,
           transaction_count: transactionCounts[businessId] ?? 0,
+          sac_meeting_scheduled: sacTracking[businessId]?.meeting_scheduled ?? false,
+          sac_attended_implementation: sacTracking[businessId]?.attended_implementation ?? false,
         };
       });
     },

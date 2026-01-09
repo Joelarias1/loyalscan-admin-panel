@@ -24,4 +24,7 @@ export interface Trial {
   // Counts
   customer_count: number;
   transaction_count: number;
+  // SAC tracking fields
+  sac_meeting_scheduled: boolean;
+  sac_attended_implementation: boolean;
 }

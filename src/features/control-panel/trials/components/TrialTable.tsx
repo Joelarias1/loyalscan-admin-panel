@@ -21,19 +21,22 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useId, useMemo, useRef, useState } from "react";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { Trial } from "../types";
 import { createColumns } from "./TrialTableColumns";
 import { TrialTablePagination } from "./TrialTablePagination";
 import { TrialTableSkeleton } from "./TrialTableSkeleton";
 import { TrialTableToolbar } from "./TrialTableToolbar";
+import { useSacTracking } from "../hooks/useSacTracking";
 
 interface TrialTableProps {
   data: Trial[];
   isLoading: boolean;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
-export const TrialTable = ({ data, isLoading }: TrialTableProps) => {
+export const TrialTable = ({ data, isLoading, onRefresh, isRefreshing }: TrialTableProps) => {
   const id = useId();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -42,6 +45,7 @@ export const TrialTable = ({ data, isLoading }: TrialTableProps) => {
     pageSize: 10,
   });
   const inputRef = useRef<HTMLInputElement>(null);
+  const sacMutation = useSacTracking();
 
   const [sorting, setSorting] = useState<SortingState>([
     {
@@ -50,7 +54,14 @@ export const TrialTable = ({ data, isLoading }: TrialTableProps) => {
     },
   ]);
 
-  const columns = useMemo(() => createColumns(), []);
+  const handleSacUpdate = useCallback(
+    (businessId: string, field: "meeting_scheduled" | "attended_implementation", value: boolean) => {
+      sacMutation.mutate({ businessId, field, value });
+    },
+    [sacMutation]
+  );
+
+  const columns = useMemo(() => createColumns({ onSacUpdate: handleSacUpdate }), [handleSacUpdate]);
 
   const table = useReactTable({
     data,
@@ -123,6 +134,8 @@ export const TrialTable = ({ data, isLoading }: TrialTableProps) => {
         uniqueStatusValues={uniqueStatusValues}
         statusCounts={statusCounts}
         onStatusChange={handleStatusChange}
+        onRefresh={onRefresh}
+        isRefreshing={isRefreshing}
       />
 
       {/* Table */}

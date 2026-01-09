@@ -32,9 +32,11 @@ interface BusinessTableProps {
   data: Business[];
   isLoading: boolean;
   isTestMode?: boolean;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
-export const BusinessTable = ({ data, isLoading, isTestMode = false }: BusinessTableProps) => {
+export const BusinessTable = ({ data, isLoading, isTestMode = false, onRefresh, isRefreshing }: BusinessTableProps) => {
   const id = useId();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -185,6 +187,8 @@ export const BusinessTable = ({ data, isLoading, isTestMode = false }: BusinessT
         uniquePlanValues={uniquePlanValues}
         planCounts={planCounts}
         onPlanChange={handlePlanChange}
+        onRefresh={onRefresh}
+        isRefreshing={isRefreshing}
       />
 
       {/* Table */}

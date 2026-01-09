@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table } from "@tanstack/react-table";
-import { CircleX, Columns3, Filter, ListFilter } from "lucide-react";
+import { CircleX, Columns3, Filter, ListFilter, RefreshCw } from "lucide-react";
 import { RefObject } from "react";
 import { Trial } from "../types";
 import { getTrialStatusLabel } from "../utils";
@@ -25,6 +25,8 @@ interface TrialTableToolbarProps {
   uniqueStatusValues: string[];
   statusCounts: Map<any, any>;
   onStatusChange: (checked: boolean, value: string) => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function TrialTableToolbar({
@@ -35,6 +37,8 @@ export function TrialTableToolbar({
   uniqueStatusValues,
   statusCounts,
   onStatusChange,
+  onRefresh,
+  isRefreshing,
 }: TrialTableToolbarProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -142,6 +146,7 @@ export function TrialTableToolbar({
                   converted_at: "Conversión",
                   days_remaining: "Días restantes",
                   created_at: "Registro",
+                  sac: "SAC",
                 };
                 return (
                   <DropdownMenuCheckboxItem
@@ -158,11 +163,22 @@ export function TrialTableToolbar({
         </DropdownMenu>
       </div>
       <div className="flex items-center gap-3">
-        {/* Selected count */}
-        {table.getSelectedRowModel().rows.length > 0 && (
-          <span className="text-sm text-muted-foreground">
-            {table.getSelectedRowModel().rows.length} seleccionado(s)
-          </span>
+        {/* Refresh button */}
+        {onRefresh && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            title="Actualizar datos"
+          >
+            <RefreshCw
+              className={cn("h-4 w-4", isRefreshing && "animate-spin")}
+              aria-hidden="true"
+            />
+            <span className="sr-only">Actualizar</span>
+          </Button>
         )}
       </div>
     </div>

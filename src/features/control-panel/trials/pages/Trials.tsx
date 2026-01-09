@@ -13,7 +13,7 @@ type StripeMode = "live" | "test";
 const Trials = () => {
   const [mode, setMode] = useState<StripeMode>("live");
   const { data: stats, isLoading: statsLoading } = useTrialStats(mode);
-  const { data: trials, isLoading: trialsLoading } = useTrials(mode);
+  const { data: trials, isLoading: trialsLoading, refetch, isFetching } = useTrials(mode);
 
   const cards = [
     {
@@ -130,7 +130,12 @@ const Trials = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
-            <TrialTable data={trials || []} isLoading={trialsLoading} />
+            <TrialTable
+              data={trials || []}
+              isLoading={trialsLoading}
+              onRefresh={() => refetch()}
+              isRefreshing={isFetching && !trialsLoading}
+            />
           </CardContent>
         </Card>
       </div>

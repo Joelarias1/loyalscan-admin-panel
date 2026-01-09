@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table } from "@tanstack/react-table";
-import { CircleX, Columns3, Filter, ListFilter, Package } from "lucide-react";
+import { CircleX, Columns3, Filter, ListFilter, Package, RefreshCw } from "lucide-react";
 import { RefObject } from "react";
 import { Business } from "../types";
 import { getPlanDisplayName, NO_PLAN_VALUE } from "../plans";
@@ -31,6 +31,8 @@ interface BusinessTableToolbarProps {
   uniquePlanValues: string[];
   planCounts: Map<any, any>;
   onPlanChange: (checked: boolean, value: string) => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function BusinessTableToolbar({
@@ -46,10 +48,13 @@ export function BusinessTableToolbar({
   uniquePlanValues,
   planCounts,
   onPlanChange,
+  onRefresh,
+  isRefreshing,
 }: BusinessTableToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      {/* Filter by name or email */}
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-center gap-3">
+        {/* Filter by name or email */}
         <div className="relative">
           <Input
             id={`${id}-input`}
@@ -213,6 +218,26 @@ export function BusinessTableToolbar({
               })}
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
+      <div className="flex items-center gap-3">
+        {/* Refresh button */}
+        {onRefresh && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            title="Actualizar datos"
+          >
+            <RefreshCw
+              className={cn("h-4 w-4", isRefreshing && "animate-spin")}
+              aria-hidden="true"
+            />
+            <span className="sr-only">Actualizar</span>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
