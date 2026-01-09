@@ -7,8 +7,6 @@ import { ArrowLeft, Eye, EyeOff, Loader2, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +17,6 @@ import { useNavigate } from "react-router-dom";
 
 enum AuthView {
   SIGN_IN = "sign-in",
-  SIGN_UP = "sign-up",
   FORGOT_PASSWORD = "forgot-password",
   RESET_SUCCESS = "reset-success",
 }
@@ -43,21 +40,11 @@ const signInSchema = z.object({
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
 
-const signUpSchema = z.object({
-  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  email: z.string().email("Correo electrónico inválido"),
-  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
-  terms: z.boolean().refine((val) => val === true, {
-    message: "Debes aceptar los términos y condiciones",
-  }),
-});
-
 const forgotPasswordSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
 });
 
 type SignInFormValues = z.infer<typeof signInSchema>;
-type SignUpFormValues = z.infer<typeof signUpSchema>;
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 // --------------------------------
@@ -101,13 +88,6 @@ function Auth({ className, ...props }: React.ComponentProps<"div">) {
               <AuthSignIn
                 key="sign-in"
                 onForgotPassword={() => setView(AuthView.FORGOT_PASSWORD)}
-                onSignUp={() => setView(AuthView.SIGN_UP)}
-              />
-            )}
-            {state.view === AuthView.SIGN_UP && (
-              <AuthSignUp
-                key="sign-up"
-                onSignIn={() => setView(AuthView.SIGN_IN)}
               />
             )}
             {state.view === AuthView.FORGOT_PASSWORD && (
@@ -174,10 +154,9 @@ function AuthError({ message }: AuthErrorProps) {
 
 interface AuthSignInProps {
   onForgotPassword: () => void;
-  onSignUp: () => void;
 }
 
-function AuthSignIn({ onForgotPassword, onSignUp }: AuthSignInProps) {
+function AuthSignIn({ onForgotPassword }: AuthSignInProps) {
   const [formState, setFormState] = React.useState<FormState>({
     isLoading: false,
     error: null,
@@ -293,185 +272,6 @@ function AuthSignIn({ onForgotPassword, onSignUp }: AuthSignInProps) {
           )}
         </Button>
       </AuthForm>
-
-      <p className="mt-8 text-left text-sm text-muted-foreground">
-        ¿No tienes cuenta?{" "}
-        <Button
-          variant="link"
-          className="h-auto p-0 text-sm"
-          onClick={onSignUp}
-          disabled={formState.isLoading}
-        >
-          Crea una
-        </Button>
-      </p>
-    </motion.div>
-  );
-}
-
-// --------------------------------
-// Componente Registro
-// --------------------------------
-
-interface AuthSignUpProps {
-  onSignIn: () => void;
-}
-
-function AuthSignUp({ onSignIn }: AuthSignUpProps) {
-  const [formState, setFormState] = React.useState<FormState>({
-    isLoading: false,
-    error: null,
-    showPassword: false,
-  });
-
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<SignUpFormValues>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: { name: "", email: "", password: "", terms: false },
-  });
-
-  const terms = watch("terms");
-
-  const onSubmit = async (data: SignUpFormValues) => {
-    setFormState((prev) => ({ ...prev, isLoading: true, error: null }));
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500)); // Simular llamada API
-      setFormState((prev) => ({ ...prev, error: "El registro está deshabilitado actualmente." }));
-    } catch {
-      setFormState((prev) => ({ ...prev, error: "Ha ocurrido un error inesperado" }));
-    } finally {
-      setFormState((prev) => ({ ...prev, isLoading: false }));
-    }
-  };
-
-  return (
-    <motion.div
-      data-slot="auth-sign-up"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="p-8"
-    >
-      <div className="mb-8 flex flex-col items-start text-left">
-        <div className="flex items-center gap-2 mb-6 transition-all duration-200">
-          <img 
-            src="/logo.svg" 
-            alt="Logo" 
-            className="h-10 w-10 object-contain" 
-          />
-          <span className="font-bold text-xl tracking-tight text-foreground">
-            LoyalScan
-          </span>
-        </div>
-        <h1 className="text-3xl font-semibold text-foreground">Crear cuenta</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Comienza hoy mismo</p>
-      </div>
-
-      <AuthError message={formState.error} />
-
-      <AuthForm<SignUpFormValues> onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-2">
-          <Label htmlFor="name">Nombre</Label>
-          <Input
-            id="name"
-            type="text"
-            placeholder="Juan Pérez"
-            disabled={formState.isLoading}
-            className={cn(errors.name && "border-destructive")}
-            {...register("name")}
-          />
-          {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email">Correo electrónico</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="nombre@ejemplo.com"
-            disabled={formState.isLoading}
-            className={cn(errors.email && "border-destructive")}
-            {...register("email")}
-          />
-          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="password">Contraseña</Label>
-          <div className="relative">
-            <Input
-              id="password"
-              type={formState.showPassword ? "text" : "password"}
-              placeholder="••••••••"
-              disabled={formState.isLoading}
-              className={cn(errors.password && "border-destructive")}
-              {...register("password")}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="absolute right-0 top-0 h-full"
-              onClick={() =>
-                setFormState((prev) => ({ ...prev, showPassword: !prev.showPassword }))
-              }
-              disabled={formState.isLoading}
-            >
-              {formState.showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </Button>
-          </div>
-          {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="terms"
-            checked={terms}
-            onCheckedChange={(checked) => setValue("terms", checked === true)}
-            disabled={formState.isLoading}
-          />
-          <div className="space-y-1">
-            <Label htmlFor="terms" className="text-sm">
-              Acepto los términos y condiciones
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              Al registrarte, aceptas nuestros{" "}
-              <Button variant="link" className="h-auto p-0 text-xs">
-                Términos
-              </Button>{" "}
-              y{" "}
-              <Button variant="link" className="h-auto p-0 text-xs">
-                Política de Privacidad
-              </Button>
-              .
-            </p>
-          </div>
-        </div>
-        {errors.terms && <p className="text-xs text-destructive">{errors.terms.message}</p>}
-
-        <Button type="submit" className="w-full" disabled={formState.isLoading}>
-          {formState.isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creando cuenta...
-            </>
-          ) : (
-            "Crear cuenta"
-          )}
-        </Button>
-      </AuthForm>
-
-      <p className="mt-8 text-left text-sm text-muted-foreground">
-        ¿Ya tienes cuenta?{" "}
-        <Button
-          variant="link"
-          className="h-auto p-0 text-sm"
-          onClick={onSignIn}
-          disabled={formState.isLoading}
-        >
-          Inicia sesión
-        </Button>
-      </p>
     </motion.div>
   );
 }
@@ -641,7 +441,6 @@ function AuthResetSuccess({ onSignIn }: AuthResetSuccessProps) {
 export {
   Auth as default,
   AuthSignIn,
-  AuthSignUp,
   AuthForgotPassword,
   AuthResetSuccess,
   AuthForm,
