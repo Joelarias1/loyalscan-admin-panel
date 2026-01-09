@@ -90,7 +90,7 @@ const Trials = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="hover:shadow-lg transition-all duration-300 border-none shadow-sm">
+              <Card className="stat-card">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {card.title}

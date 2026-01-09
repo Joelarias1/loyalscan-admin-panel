@@ -26,6 +26,7 @@ export const useTrials = (mode: StripeMode = "live") => {
             id,
             name,
             email,
+            phone,
             payment_status,
             is_trial,
             stripe_mode,
@@ -40,30 +41,74 @@ export const useTrials = (mode: StripeMode = "live") => {
         throw error;
       }
 
-      // Filter by stripe mode and transform the data
-      return (data as any[])
-        ?.filter((item) => item.business?.stripe_mode === mode)
-        .map((item): Trial => {
-          const business = item.business;
-          const daysRemaining = calculateDaysRemaining(item.trial_ends_at);
+      // Filter by stripe mode
+      const filteredData = (data as any[])?.filter(
+        (item) => item.business?.stripe_mode === mode
+      ) ?? [];
 
-          return {
-            id: business?.id ?? item.id,
-            name: business?.name ?? "Sin nombre",
-            email: business?.email ?? "",
-            payment_status: business?.payment_status ?? "unknown",
-            is_trial: business?.is_trial ?? false,
-            created_at: business?.created_at ?? item.created_at,
-            trial_type: item.trial_type,
-            trial_status: item.status,
-            trial_started_at: item.trial_started_at,
-            trial_ends_at: item.trial_ends_at,
-            source_url: item.source_url,
-            days_remaining: daysRemaining,
-            onboarding_completed: business?.onboarding_completed ?? false,
-            converted_at: item.converted_at,
-          };
-        }) ?? [];
+      // Get business IDs to fetch customer counts
+      const businessIds = filteredData
+        .map((item) => item.business?.id)
+        .filter(Boolean);
+
+      // Fetch customer and transaction counts for all businesses
+      let customerCounts: Record<string, number> = {};
+      let transactionCounts: Record<string, number> = {};
+
+      if (businessIds.length > 0) {
+        // Fetch customer counts
+        const { data: customerData } = await supabase
+          .from("customers")
+          .select("business_id")
+          .in("business_id", businessIds);
+
+        if (customerData) {
+          customerCounts = customerData.reduce((acc, row) => {
+            acc[row.business_id] = (acc[row.business_id] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+        }
+
+        // Fetch transaction counts (escaneos)
+        const { data: transactionData } = await supabase
+          .from("transactions")
+          .select("business_id")
+          .in("business_id", businessIds);
+
+        if (transactionData) {
+          transactionCounts = transactionData.reduce((acc, row) => {
+            acc[row.business_id] = (acc[row.business_id] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+        }
+      }
+
+      // Transform the data with counts
+      return filteredData.map((item): Trial => {
+        const business = item.business;
+        const daysRemaining = calculateDaysRemaining(item.trial_ends_at);
+        const businessId = business?.id ?? item.id;
+
+        return {
+          id: businessId,
+          name: business?.name ?? "Sin nombre",
+          email: business?.email ?? "",
+          phone: business?.phone ?? null,
+          payment_status: business?.payment_status ?? "unknown",
+          is_trial: business?.is_trial ?? false,
+          created_at: business?.created_at ?? item.created_at,
+          trial_type: item.trial_type,
+          trial_status: item.status,
+          trial_started_at: item.trial_started_at,
+          trial_ends_at: item.trial_ends_at,
+          source_url: item.source_url,
+          days_remaining: daysRemaining,
+          onboarding_completed: business?.onboarding_completed ?? false,
+          converted_at: item.converted_at,
+          customer_count: customerCounts[businessId] ?? 0,
+          transaction_count: transactionCounts[businessId] ?? 0,
+        };
+      });
     },
   });
 };

@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { Trial } from "../types";
 import {
@@ -12,39 +11,48 @@ import {
 
 export const createColumns = (): ColumnDef<Trial>[] => [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Seleccionar todo"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Seleccionar fila"
-      />
-    ),
-    size: 40,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     header: "Negocio",
     accessorKey: "name",
     cell: ({ row }) => (
       <div className="flex flex-col">
         <span className="font-semibold text-gray-900">{row.getValue("name")}</span>
         <span className="text-sm text-gray-500">{row.original.email || "—"}</span>
+        {row.original.phone && (
+          <span className="text-xs text-gray-400">{row.original.phone}</span>
+        )}
       </div>
     ),
     size: 260,
     filterFn: multiColumnFilterFn,
     enableHiding: false,
+  },
+  {
+    header: "Clientes",
+    accessorKey: "customer_count",
+    cell: ({ row }) => {
+      const count = row.original.customer_count;
+      return (
+        <span className={`text-sm font-medium ${count > 0 ? "text-gray-900" : "text-gray-400"}`}>
+          {count}
+        </span>
+      );
+    },
+    size: 100,
+    enableSorting: true,
+  },
+  {
+    header: "Escaneos",
+    accessorKey: "transaction_count",
+    cell: ({ row }) => {
+      const count = row.original.transaction_count;
+      return (
+        <span className={`text-sm font-medium ${count > 0 ? "text-gray-900" : "text-gray-400"}`}>
+          {count}
+        </span>
+      );
+    },
+    size: 100,
+    enableSorting: true,
   },
   {
     header: "Tipo",

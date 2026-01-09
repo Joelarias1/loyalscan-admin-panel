@@ -81,3 +81,10 @@
     @apply transition-all duration-200;
   }
 }
+
+@layer components {
+  /* Card de estadísticas - usado en dashboards */
+  .stat-card {
+    @apply hover:shadow-lg transition-all duration-300 border border-gray-200 shadow-sm;
+  }
+}

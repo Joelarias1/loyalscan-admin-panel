@@ -6,6 +6,7 @@ export interface Trial {
   id: string;
   name: string;
   email: string;
+  phone: string | null;
   payment_status: string;
   is_trial: boolean;
   created_at: string;
@@ -20,4 +21,7 @@ export interface Trial {
   onboarding_completed: boolean;
   // Conversion fields
   converted_at: string | null;
+  // Counts
+  customer_count: number;
+  transaction_count: number;
 }

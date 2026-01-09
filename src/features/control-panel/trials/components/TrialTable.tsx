@@ -41,7 +41,6 @@ export const TrialTable = ({ data, isLoading }: TrialTableProps) => {
     pageIndex: 0,
     pageSize: 10,
   });
-  const [rowSelection, setRowSelection] = useState({});
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [sorting, setSorting] = useState<SortingState>([
@@ -66,13 +65,11 @@ export const TrialTable = ({ data, isLoading }: TrialTableProps) => {
     onColumnVisibilityChange: setColumnVisibility,
     getFilteredRowModel: getFilteredRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       pagination,
       columnFilters,
       columnVisibility,
-      rowSelection,
     },
   });
 
@@ -196,8 +193,7 @@ export const TrialTable = ({ data, isLoading }: TrialTableProps) => {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="border-b border-gray-100 hover:bg-gray-50/80 transition-colors data-[state=selected]:bg-blue-50/50"
+                  className="border-b border-gray-100 hover:bg-gray-50/80 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-4 last:py-4">

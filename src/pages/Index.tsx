@@ -46,7 +46,7 @@ const Index = () => {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
-            <Card key={stat.title} className="hover:shadow-md transition-shadow border-none shadow-sm">
+            <Card key={stat.title} className="stat-card">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}
