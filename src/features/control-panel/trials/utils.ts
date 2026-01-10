@@ -45,7 +45,7 @@ export const getTrialStatusLabel = (status: TrialStatus | null): { label: string
       };
     case "converted":
       return {
-        label: "Convertido",
+        label: "Empezó prueba",
         className: "bg-emerald-100 text-emerald-800 border-emerald-300",
       };
     case "expired":
