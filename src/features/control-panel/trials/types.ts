@@ -21,9 +21,11 @@ export interface Trial {
   onboarding_completed: boolean;
   // Conversion fields
   converted_at: string | null;
-  // Counts
+  // Counts & Revenue
   customer_count: number;
   transaction_count: number;
+  total_revenue: number;
+  currency: string;
   // SAC tracking fields
   sac_meeting_scheduled: boolean;
   sac_attended_implementation: boolean;

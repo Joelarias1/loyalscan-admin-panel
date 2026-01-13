@@ -20,9 +20,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import { useId, useMemo, useRef, useState } from "react";
 import { Business } from "../types";
+import { getBusinessComputedStatus } from "../utils";
 import { createColumns } from "./BusinessTableColumns";
 import { BusinessTablePagination } from "./BusinessTablePagination";
 import { BusinessTableSkeleton } from "./BusinessTableSkeleton";
@@ -79,20 +80,25 @@ export const BusinessTable = ({ data, isLoading, isTestMode = false, onRefresh, 
     },
   });
 
-  // Get unique status values
+  // Get unique status values (using computed status)
   const uniqueStatusValues = useMemo(() => {
-    const statusColumn = table.getColumn("payment_status");
-    if (!statusColumn) return [];
-    const values = Array.from(statusColumn.getFacetedUniqueValues().keys());
-    return values.sort();
-  }, [table.getColumn("payment_status")?.getFacetedUniqueValues()]);
+    const statusMap = new Map<string, number>();
+    data.forEach((business) => {
+      const computedStatus = getBusinessComputedStatus(business);
+      statusMap.set(computedStatus, (statusMap.get(computedStatus) || 0) + 1);
+    });
+    return Array.from(statusMap.keys()).sort();
+  }, [data]);
 
-  // Get counts for each status
+  // Get counts for each status (using computed status)
   const statusCounts = useMemo(() => {
-    const statusColumn = table.getColumn("payment_status");
-    if (!statusColumn) return new Map();
-    return statusColumn.getFacetedUniqueValues();
-  }, [table.getColumn("payment_status")?.getFacetedUniqueValues()]);
+    const statusMap = new Map<string, number>();
+    data.forEach((business) => {
+      const computedStatus = getBusinessComputedStatus(business);
+      statusMap.set(computedStatus, (statusMap.get(computedStatus) || 0) + 1);
+    });
+    return statusMap;
+  }, [data]);
 
   const selectedStatuses = useMemo(() => {
     const filterValue = table.getColumn("payment_status")?.getFilterValue() as string[];
@@ -115,37 +121,54 @@ export const BusinessTable = ({ data, isLoading, isTestMode = false, onRefresh, 
     table.getColumn("payment_status")?.setFilterValue(newFilterValue.length ? newFilterValue : undefined);
   };
 
-  // Get unique plan values (including null for "no plan")
+  // Helper to check if business is in trial (same logic as getPlanLabel)
+  const isBusinessInTrial = (business: Business) => {
+    const { payment_status, trialType, subscriptionStatus } = business;
+    return subscriptionStatus === "trialing" ||
+      (trialType && payment_status === "trialing") ||
+      payment_status === "trialing";
+  };
+
+  // Get unique plan values (excluding trials - they show no plan)
   const uniquePlanValues = useMemo(() => {
-    const planColumn = table.getColumn("planName");
-    if (!planColumn) return [];
-    const facetedValues = planColumn.getFacetedUniqueValues();
-    const values = Array.from(facetedValues.keys()).filter((v) => v !== null && v !== undefined) as string[];
-    // Check if there are any null/undefined values (businesses without plans)
-    const hasNoPlan = data.some((b) => !b.planName);
-    if (hasNoPlan) {
-      values.unshift("__no_plan__");
-    }
+    const planMap = new Map<string, number>();
+
+    data.forEach((business) => {
+      // Trials don't show plan, so count them as "no plan"
+      if (isBusinessInTrial(business)) {
+        planMap.set("__no_plan__", (planMap.get("__no_plan__") || 0) + 1);
+      } else if (business.planName) {
+        planMap.set(business.planName.toLowerCase(), (planMap.get(business.planName.toLowerCase()) || 0) + 1);
+      } else {
+        planMap.set("__no_plan__", (planMap.get("__no_plan__") || 0) + 1);
+      }
+    });
+
+    const values = Array.from(planMap.keys());
     return values.sort((a, b) => {
       if (a === "__no_plan__") return -1;
       if (b === "__no_plan__") return 1;
       return a.localeCompare(b);
     });
-  }, [table.getColumn("planName")?.getFacetedUniqueValues(), data]);
+  }, [data]);
 
-  // Get counts for each plan
+  // Get counts for each plan (excluding trials)
   const planCounts = useMemo(() => {
-    const planColumn = table.getColumn("planName");
-    if (!planColumn) return new Map();
-    const facetedValues = planColumn.getFacetedUniqueValues();
-    const counts = new Map(facetedValues);
-    // Count businesses without plans
-    const noPlanCount = data.filter((b) => !b.planName).length;
-    if (noPlanCount > 0) {
-      counts.set("__no_plan__", noPlanCount);
-    }
-    return counts;
-  }, [table.getColumn("planName")?.getFacetedUniqueValues(), data]);
+    const planMap = new Map<string, number>();
+
+    data.forEach((business) => {
+      // Trials don't show plan, so count them as "no plan"
+      if (isBusinessInTrial(business)) {
+        planMap.set("__no_plan__", (planMap.get("__no_plan__") || 0) + 1);
+      } else if (business.planName) {
+        planMap.set(business.planName.toLowerCase(), (planMap.get(business.planName.toLowerCase()) || 0) + 1);
+      } else {
+        planMap.set("__no_plan__", (planMap.get("__no_plan__") || 0) + 1);
+      }
+    });
+
+    return planMap;
+  }, [data]);
 
   const selectedPlans = useMemo(() => {
     const filterValue = table.getColumn("planName")?.getFilterValue() as string[];
@@ -176,6 +199,7 @@ export const BusinessTable = ({ data, isLoading, isTestMode = false, onRefresh, 
     <div className="space-y-4">
       <BusinessTableToolbar
         table={table}
+        data={data}
         inputRef={inputRef}
         id={id}
         isTestMode={isTestMode}
@@ -225,22 +249,37 @@ export const BusinessTable = ({ data, isLoading, isTestMode = false, onRefresh, 
                           {flexRender(header.column.columnDef.header, header.getContext())}
                           {{
                             asc: (
-                              <ChevronUp
-                                className="shrink-0 opacity-60"
-                                size={16}
-                                strokeWidth={2}
+                              <ArrowUp
+                                className="shrink-0 text-gray-700"
+                                size={14}
+                                strokeWidth={2.5}
                                 aria-hidden="true"
                               />
                             ),
                             desc: (
-                              <ChevronDown
-                                className="shrink-0 opacity-60"
-                                size={16}
+                              <ArrowDown
+                                className="shrink-0 text-gray-700"
+                                size={14}
+                                strokeWidth={2.5}
+                                aria-hidden="true"
+                              />
+                            ),
+                            false: (
+                              <ChevronsUpDown
+                                className="shrink-0 text-gray-400"
+                                size={14}
                                 strokeWidth={2}
                                 aria-hidden="true"
                               />
                             ),
-                          }[header.column.getIsSorted() as string] ?? null}
+                          }[header.column.getIsSorted() as string] ?? (
+                            <ChevronsUpDown
+                              className="shrink-0 text-gray-400"
+                              size={14}
+                              strokeWidth={2}
+                              aria-hidden="true"
+                            />
+                          )}
                         </div>
                       ) : (
                         flexRender(header.column.columnDef.header, header.getContext())

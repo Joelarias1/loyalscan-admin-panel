@@ -171,9 +171,16 @@ export const createColumns = (_isTestMode: boolean): ColumnDef<Business>[] => [
     cell: ({ row }) => {
       const periodEnd = row.original.currentPeriodEnd;
       const paymentStatus = row.original.payment_status;
+      const subscriptionStatus = row.original.subscriptionStatus;
+      const trialType = row.original.trialType;
 
-      // Don't show for canceled or no_payment
-      if (!periodEnd || paymentStatus === "canceled" || paymentStatus === "no_payment") {
+      // Check if it's a trial
+      const isTrial = subscriptionStatus === "trialing" ||
+        (trialType && paymentStatus === "trialing") ||
+        paymentStatus === "trialing";
+
+      // Don't show for trials, canceled or no_payment
+      if (!periodEnd || isTrial || paymentStatus === "canceled" || paymentStatus === "no_payment") {
         return <span className="text-gray-400">—</span>;
       }
 

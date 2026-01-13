@@ -10,16 +10,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { TableExport } from "@/components/TableExport";
 import { Table } from "@tanstack/react-table";
 import { CircleX, Columns3, Filter, ListFilter, Package, RefreshCw } from "lucide-react";
 import { RefObject } from "react";
 import { Business } from "../types";
 import { getPlanDisplayName, NO_PLAN_VALUE } from "../plans";
-import { getStatusLabel } from "../utils";
+import { getComputedStatusLabel } from "../utils";
+import { businessExportColumns } from "../export-columns";
 import { cn } from "@/lib/utils";
 
 interface BusinessTableToolbarProps {
   table: Table<Business>;
+  data: Business[];
   inputRef: RefObject<HTMLInputElement>;
   id: string;
   isTestMode: boolean;
@@ -37,6 +40,7 @@ interface BusinessTableToolbarProps {
 
 export function BusinessTableToolbar({
   table,
+  data,
   inputRef,
   id,
   isTestMode,
@@ -120,7 +124,7 @@ export function BusinessTableToolbar({
                       htmlFor={`${id}-status-${i}`}
                       className="flex grow justify-between gap-2 font-normal"
                     >
-                      {getStatusLabel(value, isTestMode).label}
+                      {getComputedStatusLabel(value)}
                       <span className="ms-2 text-xs text-muted-foreground">
                         {statusCounts.get(value)}
                       </span>
@@ -220,6 +224,12 @@ export function BusinessTableToolbar({
         </DropdownMenu>
       </div>
       <div className="flex items-center gap-3">
+        {/* Export */}
+        <TableExport
+          data={data}
+          columns={businessExportColumns}
+          filename="negocios"
+        />
         {/* Refresh button */}
         {onRefresh && (
           <Button

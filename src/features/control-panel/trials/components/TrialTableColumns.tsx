@@ -6,6 +6,7 @@ import {
   getTrialTypeLabel,
   getTrialStatusLabel,
   formatDaysRemaining,
+  formatCurrency,
   multiColumnFilterFn,
   statusFilterFn,
 } from "../utils";
@@ -74,6 +75,21 @@ export const createColumns = (options?: CreateColumnsOptions): ColumnDef<Trial>[
       );
     },
     size: 100,
+    enableSorting: true,
+  },
+  {
+    header: "Ingresos",
+    accessorKey: "total_revenue",
+    cell: ({ row }) => {
+      const revenue = row.original.total_revenue;
+      const currency = row.original.currency;
+      return (
+        <span className={`text-sm font-medium ${revenue > 0 ? "text-emerald-700" : "text-gray-400"}`}>
+          {formatCurrency(revenue, currency)}
+        </span>
+      );
+    },
+    size: 120,
     enableSorting: true,
   },
   {

@@ -20,7 +20,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { Trial } from "../types";
 import { createColumns } from "./TrialTableColumns";
@@ -128,6 +128,7 @@ export const TrialTable = ({ data, isLoading, onRefresh, isRefreshing }: TrialTa
     <div className="space-y-4">
       <TrialTableToolbar
         table={table}
+        data={data}
         inputRef={inputRef}
         id={id}
         selectedStatuses={selectedStatuses}
@@ -175,22 +176,37 @@ export const TrialTable = ({ data, isLoading, onRefresh, isRefreshing }: TrialTa
                           {flexRender(header.column.columnDef.header, header.getContext())}
                           {{
                             asc: (
-                              <ChevronUp
-                                className="shrink-0 opacity-60"
-                                size={16}
-                                strokeWidth={2}
+                              <ArrowUp
+                                className="shrink-0 text-gray-700"
+                                size={14}
+                                strokeWidth={2.5}
                                 aria-hidden="true"
                               />
                             ),
                             desc: (
-                              <ChevronDown
-                                className="shrink-0 opacity-60"
-                                size={16}
+                              <ArrowDown
+                                className="shrink-0 text-gray-700"
+                                size={14}
+                                strokeWidth={2.5}
+                                aria-hidden="true"
+                              />
+                            ),
+                            false: (
+                              <ChevronsUpDown
+                                className="shrink-0 text-gray-400"
+                                size={14}
                                 strokeWidth={2}
                                 aria-hidden="true"
                               />
                             ),
-                          }[header.column.getIsSorted() as string] ?? null}
+                          }[header.column.getIsSorted() as string] ?? (
+                            <ChevronsUpDown
+                              className="shrink-0 text-gray-400"
+                              size={14}
+                              strokeWidth={2}
+                              aria-hidden="true"
+                            />
+                          )}
                         </div>
                       ) : (
                         flexRender(header.column.columnDef.header, header.getContext())

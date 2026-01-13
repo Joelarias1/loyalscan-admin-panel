@@ -10,15 +10,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { TableExport } from "@/components/TableExport";
 import { Table } from "@tanstack/react-table";
 import { CircleX, Columns3, Filter, ListFilter, RefreshCw } from "lucide-react";
 import { RefObject } from "react";
 import { Trial } from "../types";
 import { getTrialStatusLabel } from "../utils";
+import { trialExportColumns } from "../export-columns";
 import { cn } from "@/lib/utils";
 
 interface TrialTableToolbarProps {
   table: Table<Trial>;
+  data: Trial[];
   inputRef: RefObject<HTMLInputElement>;
   id: string;
   selectedStatuses: string[];
@@ -31,6 +34,7 @@ interface TrialTableToolbarProps {
 
 export function TrialTableToolbar({
   table,
+  data,
   inputRef,
   id,
   selectedStatuses,
@@ -163,6 +167,12 @@ export function TrialTableToolbar({
         </DropdownMenu>
       </div>
       <div className="flex items-center gap-3">
+        {/* Export */}
+        <TableExport
+          data={data}
+          columns={trialExportColumns}
+          filename="pruebas-gratuitas"
+        />
         {/* Refresh button */}
         {onRefresh && (
           <Button

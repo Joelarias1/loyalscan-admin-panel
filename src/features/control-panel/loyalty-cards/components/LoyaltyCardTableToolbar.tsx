@@ -10,15 +10,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { TableExport } from "@/components/TableExport";
 import { Table } from "@tanstack/react-table";
 import { CircleX, Columns3, Filter, ListFilter } from "lucide-react";
 import { RefObject } from "react";
 import { LoyaltyCard } from "../types";
 import { getRewardsTypeLabel } from "../utils";
+import { loyaltyCardExportColumns } from "../export-columns";
 import { cn } from "@/lib/utils";
 
 interface LoyaltyCardTableToolbarProps {
   table: Table<LoyaltyCard>;
+  data: LoyaltyCard[];
   inputRef: RefObject<HTMLInputElement>;
   id: string;
   selectedTypes: string[];
@@ -29,6 +32,7 @@ interface LoyaltyCardTableToolbarProps {
 
 export function LoyaltyCardTableToolbar({
   table,
+  data,
   inputRef,
   id,
   selectedTypes,
@@ -37,7 +41,8 @@ export function LoyaltyCardTableToolbar({
   onTypeChange,
 }: LoyaltyCardTableToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-center gap-3">
       {/* Filter by name or business */}
       <div className="relative">
         <Input
@@ -154,6 +159,15 @@ export function LoyaltyCardTableToolbar({
             })}
         </DropdownMenuContent>
       </DropdownMenu>
+      </div>
+      <div className="flex items-center gap-3">
+        {/* Export */}
+        <TableExport
+          data={data}
+          columns={loyaltyCardExportColumns}
+          filename="tarjetas-lealtad"
+        />
+      </div>
     </div>
   );
 }

@@ -31,7 +31,8 @@ export const useTrials = (mode: StripeMode = "live") => {
             is_trial,
             stripe_mode,
             created_at,
-            onboarding_completed
+            onboarding_completed,
+            business_currency
           )
         `)
         .order("trial_ends_at", { ascending: true });
@@ -54,6 +55,7 @@ export const useTrials = (mode: StripeMode = "live") => {
       // Fetch customer and transaction counts for all businesses
       let customerCounts: Record<string, number> = {};
       let transactionCounts: Record<string, number> = {};
+      let revenueTotals: Record<string, number> = {};
       let sacTracking: Record<string, { meeting_scheduled: boolean; attended_implementation: boolean }> = {};
 
       if (businessIds.length > 0) {
@@ -70,17 +72,17 @@ export const useTrials = (mode: StripeMode = "live") => {
           }, {} as Record<string, number>);
         }
 
-        // Fetch transaction counts (escaneos)
+        // Fetch transaction counts and revenue (escaneos)
         const { data: transactionData } = await supabase
           .from("transactions")
-          .select("business_id")
+          .select("business_id, amount_spent")
           .in("business_id", businessIds);
 
         if (transactionData) {
-          transactionCounts = transactionData.reduce((acc, row) => {
-            acc[row.business_id] = (acc[row.business_id] || 0) + 1;
-            return acc;
-          }, {} as Record<string, number>);
+          transactionData.forEach((row) => {
+            transactionCounts[row.business_id] = (transactionCounts[row.business_id] || 0) + 1;
+            revenueTotals[row.business_id] = (revenueTotals[row.business_id] || 0) + (parseFloat(row.amount_spent) || 0);
+          });
         }
 
         // Fetch SAC tracking data
@@ -123,6 +125,8 @@ export const useTrials = (mode: StripeMode = "live") => {
           converted_at: item.converted_at,
           customer_count: customerCounts[businessId] ?? 0,
           transaction_count: transactionCounts[businessId] ?? 0,
+          total_revenue: revenueTotals[businessId] ?? 0,
+          currency: business?.business_currency ?? "CLP",
           sac_meeting_scheduled: sacTracking[businessId]?.meeting_scheduled ?? false,
           sac_attended_implementation: sacTracking[businessId]?.attended_implementation ?? false,
         };

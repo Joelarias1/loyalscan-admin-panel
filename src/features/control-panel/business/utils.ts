@@ -19,22 +19,97 @@ export const multiColumnFilterFn: FilterFn<Business> = (row, columnId, filterVal
   return searchableRowContent.includes(searchTerm);
 };
 
-export const statusFilterFn: FilterFn<Business> = (row, columnId, filterValue: string[]) => {
-  if (!filterValue?.length) return true;
-  const status = row.getValue(columnId) as string;
-  return filterValue.includes(status);
+// Get computed status for filtering (includes trial types)
+// Consolidates all statuses into: trial_with_card, trial_without_card, active, no_payment, canceled, trial_expired
+export const getBusinessComputedStatus = (business: Business): string => {
+  const { payment_status, trialType, subscriptionStatus } = business;
+
+  // Check if it's a trial (any form of trialing)
+  const isTrial = subscriptionStatus === "trialing" ||
+    (trialType && payment_status === "trialing") ||
+    payment_status === "trialing";
+
+  if (isTrial) {
+    return trialType === "with_card" ? "trial_with_card" : "trial_without_card";
+  }
+
+  // For active/paid subscriptions - consolidate to "active"
+  if (subscriptionStatus === "active" || payment_status === "paid" || payment_status === "active") {
+    return "active";
+  }
+
+  // Canceled states
+  if (payment_status === "canceled" || payment_status === "unpaid") {
+    return "canceled";
+  }
+
+  // Trial expired
+  if (payment_status === "trial_expired") {
+    return "trial_expired";
+  }
+
+  // No payment / solo registro
+  if (payment_status === "no_payment") {
+    return "no_payment";
+  }
+
+  // Any other status defaults to no_payment (solo registro)
+  return "no_payment";
 };
 
-// Plan filter function
+export const statusFilterFn: FilterFn<Business> = (row, columnId, filterValue: string[]) => {
+  if (!filterValue?.length) return true;
+  const computedStatus = getBusinessComputedStatus(row.original);
+  return filterValue.includes(computedStatus);
+};
+
+// Get label for computed status (for filter dropdown)
+export const getComputedStatusLabel = (status: string): string => {
+  switch (status) {
+    case "trial_with_card":
+      return "Prueba con tarjeta";
+    case "trial_without_card":
+      return "Prueba sin tarjeta";
+    case "active":
+    case "paid":
+      return "Pagando";
+    case "no_payment":
+      return "Solo registro";
+    case "canceled":
+    case "unpaid":
+      return "Cancelado";
+    case "trial_expired":
+      return "Trial expirado";
+    default:
+      return status || "—";
+  }
+};
+
+// Helper to check if business is in trial
+const isBusinessInTrial = (business: Business): boolean => {
+  const { payment_status, trialType, subscriptionStatus } = business;
+  return subscriptionStatus === "trialing" ||
+    (trialType && payment_status === "trialing") ||
+    payment_status === "trialing";
+};
+
+// Plan filter function (trials count as "no plan" since they don't show plan in table)
 export const planFilterFn: FilterFn<Business> = (row, columnId, filterValue: string[]) => {
   if (!filterValue?.length) return true;
-  const planName = row.original.planName;
-  // Handle "no plan" filter
+
+  const business = row.original;
+  const isTrial = isBusinessInTrial(business);
+
+  // Handle "no plan" filter - includes trials and businesses without plan
   if (filterValue.includes("__no_plan__")) {
-    if (!planName) return true;
+    if (isTrial || !business.planName) return true;
   }
-  if (!planName) return false;
-  return filterValue.includes(planName.toLowerCase());
+
+  // Trials don't match any specific plan filter
+  if (isTrial) return false;
+
+  if (!business.planName) return false;
+  return filterValue.includes(business.planName.toLowerCase());
 };
 
 // Payment status label mapping (Estado Plan)
@@ -47,10 +122,15 @@ export const getPaymentStatusLabel = (
   // First check: If subscription is trialing OR has trial type, they're in trial
   // This catches CT trials where payment_status might say "active" but trial hasn't ended
   if (subscriptionStatus === "trialing" || (trialType && payment_status === "trialing")) {
-    const trialLabel = trialType === "with_card" ? "CT" : trialType === "without_card" ? "ST" : "";
+    if (trialType === "with_card") {
+      return {
+        label: "Prueba con tarjeta",
+        className: "bg-violet-100 text-violet-800 border-violet-300"
+      };
+    }
     return {
-      label: `Prueba gratis${trialLabel ? ` (${trialLabel})` : ""}`,
-      className: "bg-blue-100 text-blue-800 border-blue-300"
+      label: "Prueba sin tarjeta",
+      className: "bg-amber-100 text-amber-800 border-amber-300"
     };
   }
 
@@ -72,15 +152,20 @@ export const getPaymentStatusLabel = (
         className: "bg-emerald-100 text-emerald-800 border-emerald-300"
       };
     case "trialing": {
-      const trialLabel = trialType === "with_card" ? "CT" : trialType === "without_card" ? "ST" : "";
+      if (trialType === "with_card") {
+        return {
+          label: "Prueba con tarjeta",
+          className: "bg-violet-100 text-violet-800 border-violet-300"
+        };
+      }
       return {
-        label: `Prueba gratis${trialLabel ? ` (${trialLabel})` : ""}`,
-        className: "bg-blue-100 text-blue-800 border-blue-300"
+        label: "Prueba sin tarjeta",
+        className: "bg-amber-100 text-amber-800 border-amber-300"
       };
     }
     case "no_payment":
       return {
-        label: "Aún no paga",
+        label: "Solo registro",
         className: "bg-gray-100 text-gray-600 border-gray-300"
       };
     case "canceled":
@@ -102,19 +187,26 @@ export const getPaymentStatusLabel = (
   }
 };
 
-// Plan label - shows which plan they selected (regardless of payment status)
+// Plan label - shows which plan they selected (only for paying customers)
 export const getPlanLabel = (
   business: Business
 ): { label: string; className: string } | null => {
-  // Show plan name if they have one (whether paying or trialing)
-  if (business.planName) {
-    // Different styling for active vs trialing
-    const isActive = business.subscriptionStatus === "active";
+  const { payment_status, trialType, subscriptionStatus, planName } = business;
+
+  // Don't show plan for trials
+  const isTrial = subscriptionStatus === "trialing" ||
+    (trialType && payment_status === "trialing") ||
+    payment_status === "trialing";
+
+  if (isTrial) {
+    return null;
+  }
+
+  // Show plan name if they have one and are paying
+  if (planName) {
     return {
-      label: formatPlanName(business.planName),
-      className: isActive
-        ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-        : "bg-gray-100 text-gray-700 border-gray-300" // Lighter for trials
+      label: formatPlanName(planName),
+      className: "bg-emerald-100 text-emerald-800 border-emerald-300"
     };
   }
 
