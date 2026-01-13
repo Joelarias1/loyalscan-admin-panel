@@ -135,9 +135,10 @@ export const useConvertToWithoutCard = () => {
         description: `El negocio ahora tiene ${TRIAL_DURATION_DAYS} días de prueba gratuita sin tarjeta.`,
         duration: 4000,
       });
-      // Invalidate all trials and stats queries to refetch updated data
+      // Invalidate all trials, stats, and businesses queries to refetch updated data
       queryClient.invalidateQueries({ queryKey: ["trials"] });
       queryClient.invalidateQueries({ queryKey: ["trial-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["businesses"] });
     },
     onError: (error: Error) => {
       toast.error("Error al convertir trial", {
