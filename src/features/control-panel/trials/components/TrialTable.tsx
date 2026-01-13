@@ -28,6 +28,7 @@ import { TrialTablePagination } from "./TrialTablePagination";
 import { TrialTableSkeleton } from "./TrialTableSkeleton";
 import { TrialTableToolbar } from "./TrialTableToolbar";
 import { useSacTracking } from "../hooks/useSacTracking";
+import { useConvertToWithoutCard } from "../hooks/useConvertToWithoutCard";
 
 interface TrialTableProps {
   data: Trial[];
@@ -46,6 +47,7 @@ export const TrialTable = ({ data, isLoading, onRefresh, isRefreshing }: TrialTa
   });
   const inputRef = useRef<HTMLInputElement>(null);
   const sacMutation = useSacTracking();
+  const convertMutation = useConvertToWithoutCard();
 
   const [sorting, setSorting] = useState<SortingState>([
     {
@@ -61,7 +63,22 @@ export const TrialTable = ({ data, isLoading, onRefresh, isRefreshing }: TrialTa
     [sacMutation]
   );
 
-  const columns = useMemo(() => createColumns({ onSacUpdate: handleSacUpdate }), [handleSacUpdate]);
+  const handleConvertToWithoutCard = useCallback(
+    (businessId: string) => {
+      convertMutation.mutate({ businessId });
+    },
+    [convertMutation]
+  );
+
+  const columns = useMemo(
+    () =>
+      createColumns({
+        onSacUpdate: handleSacUpdate,
+        onConvertToWithoutCard: handleConvertToWithoutCard,
+        isConverting: convertMutation.isPending,
+      }),
+    [handleSacUpdate, handleConvertToWithoutCard, convertMutation.isPending]
+  );
 
   const table = useReactTable({
     data,

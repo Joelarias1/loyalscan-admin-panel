@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { Trial } from "../types";
@@ -13,6 +14,8 @@ import {
 
 interface CreateColumnsOptions {
   onSacUpdate?: (businessId: string, field: "meeting_scheduled" | "attended_implementation", value: boolean) => void;
+  onConvertToWithoutCard?: (businessId: string) => void;
+  isConverting?: boolean;
 }
 
 export const createColumns = (options?: CreateColumnsOptions): ColumnDef<Trial>[] => [
@@ -273,5 +276,35 @@ export const createColumns = (options?: CreateColumnsOptions): ColumnDef<Trial>[
     },
     size: 100,
     enableHiding: true,
+  },
+  {
+    id: "actions",
+    header: "Acciones",
+    cell: ({ row }) => {
+      const businessId = row.original.id;
+      const trialType = row.original.trial_type;
+      const trialStatus = row.original.trial_status;
+
+      // Only show convert button for with_card trials that are pending_checkout
+      const canConvert = trialType === "with_card" && trialStatus === "pending_checkout";
+
+      if (!canConvert) {
+        return <span className="text-gray-400">—</span>;
+      }
+
+      return (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => options?.onConvertToWithoutCard?.(businessId)}
+          disabled={options?.isConverting}
+          className="h-auto py-2 px-3 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-md border border-transparent hover:border-gray-200"
+        >
+          {options?.isConverting ? "Convirtiendo..." : "Convertir a sin tarjeta"}
+        </Button>
+      );
+    },
+    size: 160,
+    enableHiding: false,
   },
 ];
