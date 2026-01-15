@@ -11,6 +11,7 @@ import {
   planFilterFn,
   statusFilterFn,
 } from "../utils";
+import { RowActions } from "./RowActions";
 
 export const createColumns = (_isTestMode: boolean): ColumnDef<Business>[] => [
   {
@@ -255,5 +256,12 @@ export const createColumns = (_isTestMode: boolean): ColumnDef<Business>[] => [
     },
     size: 100,
     enableSorting: true,
+  },
+  {
+    id: "actions",
+    header: "",
+    cell: ({ row }) => <RowActions row={row} />,
+    size: 50,
+    enableHiding: false,
   },
 ];
