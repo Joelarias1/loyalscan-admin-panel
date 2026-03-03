@@ -91,8 +91,8 @@ export function TableExport<T>({
         })
       );
 
-      // Combine header and rows
-      const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+      // Combine header and rows using semicolon delimiter (Excel in Spanish locales expects this)
+      const csvContent = [headers.join(";"), ...rows.map((row) => row.join(";"))].join("\r\n");
 
       // Add BOM for Excel UTF-8 compatibility
       const BOM = "\uFEFF";
